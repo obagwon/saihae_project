@@ -10,7 +10,7 @@
 | 한 줄 소개 | 감정 체크, 성향 테스트, 관계 가이드, 한 줄 회고 기록을 통해 일상에서 나를 가볍게 이해하는 앱 |
 | 개발 환경 | Flutter / Dart |
 | 대상 플랫폼 | Android (Flutter 기반) |
-| GitHub 저장소 URL | (여기에 본인 저장소 URL 입력) |
+| GitHub 저장소 URL | https://github.com/obagwon/saihae_project.git |
 | 원본(클론) URL | 사용하지 않음 (직접 기획 및 구현) |
 
 ---
