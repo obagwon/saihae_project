@@ -118,32 +118,32 @@ flutter build apk --release
 ### 앱 아이콘
 프로젝트에 설정한 앱 아이콘 원본입니다.
 
-![앱 아이콘 원본](assets/icons/app_icon.png)
+<img src="assets/icons/app_icon.png" alt="앱 아이콘 원본" width="180" />
 
 실제 실행 시 휴대폰에서 보이는 아이콘 캡처입니다.
 
-![실행 아이콘(휴대폰 캡처)](images/icon_phone.jpg)
+<img src="images/icon_phone.jpg" alt="실행 아이콘(휴대폰 캡처)" width="220" />
 
 ### 홈 화면
-![홈 화면 1](images/home_1.jpg)
-![홈 화면 2](images/home_2.jpg)
+<img src="images/home_1.jpg" alt="홈 화면 1" width="260" />
+<img src="images/home_2.jpg" alt="홈 화면 2" width="260" />
 
 ### 나 분석 탭 (두 번째 탭)
-![나 분석 탭](images/second_tap.jpg)
+<img src="images/second_tap.jpg" alt="나 분석 탭" width="260" />
 
 ### 성향 테스트 화면
-![성향 테스트 화면](images/test.jpg)
+<img src="images/test.jpg" alt="성향 테스트 화면" width="260" />
 
 ### 테스트 결과 화면
-![테스트 결과 1](images/test_result.jpg)
-![테스트 결과 2](images/test_result_2.jpg)
+<img src="images/test_result.jpg" alt="테스트 결과 1" width="260" />
+<img src="images/test_result_2.jpg" alt="테스트 결과 2" width="260" />
 
 ### 관계 가이드 (세 번째 탭)
-![관계 가이드](images/guide.jpg)
+<img src="images/guide.jpg" alt="관계 가이드" width="260" />
 
 ### 오늘 나의 마음 기록 (네 번째 탭)
-![오늘 나의 마음 기록 1](images/report_1.jpg)
-![오늘 나의 마음 기록 2](images/report_2.jpg)
+<img src="images/report_1.jpg" alt="오늘 나의 마음 기록 1" width="260" />
+<img src="images/report_2.jpg" alt="오늘 나의 마음 기록 2" width="260" />
 
 ---
 
