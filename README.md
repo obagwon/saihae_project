@@ -115,19 +115,35 @@ flutter build apk --release
 
 ## 7) 스크린샷
 
-> 과제 제출 시 실행 화면 캡처 2장 이상 첨부
+### 앱 아이콘
+프로젝트에 설정한 앱 아이콘 원본입니다.
+
+![앱 아이콘 원본](assets/icons/app_icon.png)
+
+실제 실행 시 휴대폰에서 보이는 아이콘 캡처입니다.
+
+![실행 아이콘(휴대폰 캡처)](images/icon_phone.jpg)
 
 ### 홈 화면
-![홈 화면](images/home.png)
+![홈 화면 1](images/home_1.jpg)
+![홈 화면 2](images/home_2.jpg)
+
+### 나 분석 탭 (두 번째 탭)
+![나 분석 탭](images/second_tap.jpg)
 
 ### 성향 테스트 화면
-![성향 테스트 화면](images/test.png)
+![성향 테스트 화면](images/test.jpg)
 
-### 결과 화면
-![결과 화면](images/result.png)
+### 테스트 결과 화면
+![테스트 결과 1](images/test_result.jpg)
+![테스트 결과 2](images/test_result_2.jpg)
 
-### 기록 화면
-![기록 화면](images/record.png)
+### 관계 가이드 (세 번째 탭)
+![관계 가이드](images/guide.jpg)
+
+### 오늘 나의 마음 기록 (네 번째 탭)
+![오늘 나의 마음 기록 1](images/report_1.jpg)
+![오늘 나의 마음 기록 2](images/report_2.jpg)
 
 ---
 
@@ -163,4 +179,3 @@ flutter build apk --release
 ## 10) 라이선스
 
 본 프로젝트는 **MIT License**를 따릅니다.
-
