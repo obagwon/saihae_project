@@ -125,8 +125,10 @@ flutter build apk --release
 <img src="images/icon_phone.jpg" alt="실행 아이콘(휴대폰 캡처)" width="220" />
 
 ### 홈 화면
-<img src="images/home_1.jpg" alt="홈 화면 1" width="260" />
-<img src="images/home_2.jpg" alt="홈 화면 2" width="260" />
+<p align="left">
+  <img src="images/home_1.jpg" alt="홈 화면 1" width="260" />
+  <img src="images/home_2.jpg" alt="홈 화면 2" width="260" />
+</p>
 
 ### 나 분석 탭 (두 번째 탭)
 <img src="images/second_tap.jpg" alt="나 분석 탭" width="260" />
@@ -135,15 +137,19 @@ flutter build apk --release
 <img src="images/test.jpg" alt="성향 테스트 화면" width="260" />
 
 ### 테스트 결과 화면
-<img src="images/test_result.jpg" alt="테스트 결과 1" width="260" />
-<img src="images/test_result_2.jpg" alt="테스트 결과 2" width="260" />
+<p align="left">
+  <img src="images/test_result.jpg" alt="테스트 결과 1" width="260" />
+  <img src="images/test_result_2.jpg" alt="테스트 결과 2" width="260" />
+</p>
 
 ### 관계 가이드 (세 번째 탭)
 <img src="images/guide.jpg" alt="관계 가이드" width="260" />
 
 ### 오늘 나의 마음 기록 (네 번째 탭)
-<img src="images/report_1.jpg" alt="오늘 나의 마음 기록 1" width="260" />
-<img src="images/report_2.jpg" alt="오늘 나의 마음 기록 2" width="260" />
+<p align="left">
+  <img src="images/report_1.jpg" alt="오늘 나의 마음 기록 1" width="260" />
+  <img src="images/report_2.jpg" alt="오늘 나의 마음 기록 2" width="260" />
+</p>
 
 ---
 
