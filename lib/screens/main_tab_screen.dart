@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
+import '../widgets/decorative.dart';
 import 'analysis_screen.dart';
 import 'home_screen.dart';
 import 'record_screen.dart';
@@ -23,66 +24,39 @@ class _MainTabScreenState extends State<MainTabScreen> {
     RecordScreen(),
   ];
 
-  void _onTapBottomItem(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  String _getTitle() {
-    switch (_selectedIndex) {
-      case 0:
-        return '사이해';
-      case 1:
-        return '나 분석';
-      case 2:
-        return '관계 가이드';
-      case 3:
-        return '기록';
-      default:
-        return '사이해';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_getTitle()),
+      body: WarmGradientBackground(
+        child: SafeArea(
+          bottom: false,
+          child: _screens[_selectedIndex],
+        ),
       ),
-      body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.white.withOpacity(.96),
+          border: const Border(top: BorderSide(color: AppColors.line)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 16,
-              offset: const Offset(0, -4),
+              color: const Color(0xFF9B6D55).withOpacity(0.10),
+              blurRadius: 18,
+              offset: const Offset(0, -5),
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onTapBottomItem,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_rounded),
-              label: '홈',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_rounded),
-              label: '나 분석',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.people_alt_rounded),
-              label: '관계',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.edit_note_rounded),
-              label: '기록',
-            ),
-          ],
+        child: SafeArea(
+          top: false,
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: (index) => setState(() => _selectedIndex = index),
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '오늘'),
+              BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: '알아보기'),
+              BottomNavigationBarItem(icon: Icon(Icons.favorite_border_rounded), label: '관계'),
+              BottomNavigationBarItem(icon: Icon(Icons.article_rounded), label: '기록'),
+            ],
+          ),
         ),
       ),
     );

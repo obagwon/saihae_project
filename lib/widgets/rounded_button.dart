@@ -8,6 +8,7 @@ class RoundedButton extends StatelessWidget {
   final IconData? icon;
   final Color? backgroundColor;
   final Color? foregroundColor;
+  final bool outlined;
 
   const RoundedButton({
     super.key,
@@ -16,46 +17,37 @@ class RoundedButton extends StatelessWidget {
     this.icon,
     this.backgroundColor,
     this.foregroundColor,
+    this.outlined = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final Color bg = backgroundColor ?? AppColors.blush;
+    final Color fg = foregroundColor ?? AppColors.white;
     final style = ElevatedButton.styleFrom(
-      backgroundColor: backgroundColor ?? AppColors.textDark,
-      foregroundColor: foregroundColor ?? AppColors.white,
-      elevation: 0,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 15,
-      ),
+      backgroundColor: outlined ? AppColors.white : bg,
+      foregroundColor: outlined ? (foregroundColor ?? AppColors.blushDark) : fg,
+      disabledBackgroundColor: AppColors.softBeige,
+      elevation: outlined ? 0 : 8,
+      shadowColor: AppColors.blush.withOpacity(.24),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(17),
+        side: BorderSide(color: outlined ? AppColors.blush : Colors.transparent, width: 1.2),
       ),
-      textStyle: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
-      ),
+      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
     );
-
-    if (icon == null) {
-      return SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: style,
-          child: Text(text),
-        ),
-      );
-    }
 
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        style: style,
-        icon: Icon(icon, size: 20),
-        label: Text(text),
-      ),
+      child: icon == null
+          ? ElevatedButton(onPressed: onPressed, style: style, child: Text(text))
+          : ElevatedButton.icon(
+              onPressed: onPressed,
+              style: style,
+              icon: Icon(icon, size: 18),
+              label: Text(text),
+            ),
     );
   }
 }

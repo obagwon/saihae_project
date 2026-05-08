@@ -2,148 +2,100 @@ import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
 import '../models/personality_type.dart';
+import '../widgets/decorative.dart';
 import '../widgets/result_card.dart';
 import '../widgets/rounded_button.dart';
-import '../widgets/section_title.dart';
 import '../widgets/soft_card.dart';
 import 'test_screen.dart';
 
 class ResultScreen extends StatelessWidget {
   final PersonalityType resultType;
 
-  const ResultScreen({
-    super.key,
-    required this.resultType,
-  });
+  const ResultScreen({super.key, required this.resultType});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('나의 결과'),
-        automaticallyImplyLeading: false,
-      ),
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      body: WarmGradientBackground(
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(18, 10, 18, 24),
             children: [
-              Text(
-                '지금의 나와 가까운\n사이해 유형이에요',
-                style: Theme.of(context).textTheme.headlineLarge,
+              Row(
+                children: [
+                  IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Navigator.popUntil(context, (route) => route.isFirst)),
+                  Expanded(
+                    child: Text('나의 사이해 유형은\n${resultType.name}이에요', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
+                  ),
+                  IconButton(icon: const Icon(Icons.ios_share_rounded), onPressed: () {}),
+                ],
               ),
-              const SizedBox(height: 12),
-              Text(
-                '결과는 고정된 성격이 아니라, 현재 나를 이해하기 위한 참고용 가이드로 봐주세요.',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 24),
-
+              const SizedBox(height: 16),
               ResultCard(type: resultType),
-
-              const SizedBox(height: 24),
-
-              SectionTitle(
-                title: '가까워지는 방법',
-                description: '${resultType.name}과 편안하게 가까워지는 힌트예요.',
-              ),
-
-              SoftCard(
-                backgroundColor: AppColors.softYellow,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: resultType.relationTips.map((tip) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.favorite_rounded,
-                            size: 20,
-                            color: AppColors.textDark,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              tip,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
+              const SizedBox(height: 16),
+              _TipList(title: '가까워지는 방법', icon: Icons.favorite_rounded, tips: resultType.relationTips),
+              const SizedBox(height: 14),
+              _TipList(title: '조심하면 좋은 점', icon: Icons.cloud_rounded, tips: resultType.avoidTips, backgroundColor: AppColors.softPeach.withOpacity(.76)),
               const SizedBox(height: 18),
-
-              SectionTitle(
-                title: '조심하면 좋은 부분',
-                description: '관계를 더 편안하게 만들기 위해 피하면 좋은 소통 방식이에요.',
+              Row(
+                children: [
+                  Expanded(child: RoundedButton(text: '관계 가이드 보기', outlined: true, onPressed: () => Navigator.popUntil(context, (route) => route.isFirst))),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: RoundedButton(
+                      text: '결과 저장하기',
+                      onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+                    ),
+                  ),
+                ],
               ),
-
-              SoftCard(
-                backgroundColor: AppColors.softBeige,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: resultType.avoidTips.map((tip) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.spa_rounded,
-                            size: 20,
-                            color: AppColors.textDark,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              tip,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
+              const SizedBox(height: 10),
               RoundedButton(
                 text: '다시 테스트하기',
                 icon: Icons.refresh_rounded,
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const TestScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              RoundedButton(
-                text: '홈으로 돌아가기',
-                icon: Icons.home_rounded,
                 backgroundColor: AppColors.white,
                 foregroundColor: AppColors.textDark,
-                onPressed: () {
-                  Navigator.popUntil(context, (route) => route.isFirst);
-                },
+                outlined: true,
+                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const TestScreen())),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _TipList extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final List<String> tips;
+  final Color? backgroundColor;
+
+  const _TipList({required this.title, required this.icon, required this.tips, this.backgroundColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return SoftCard(
+      backgroundColor: backgroundColor ?? AppColors.white,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          ...tips.map((tip) => Padding(
+                padding: const EdgeInsets.only(bottom: 9),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(icon, size: 18, color: AppColors.blush),
+                    const SizedBox(width: 9),
+                    Expanded(child: Text(tip, style: Theme.of(context).textTheme.bodyMedium)),
+                  ],
+                ),
+              )),
+        ],
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app/theme.dart';
 import '../data/personality_data.dart';
 import '../models/personality_type.dart';
+import '../widgets/decorative.dart';
 import '../widgets/rounded_button.dart';
 import '../widgets/soft_card.dart';
 import 'result_screen.dart';
@@ -171,109 +172,75 @@ class _TestScreenState extends State<TestScreen> {
     final progress = (currentQuestionIndex + 1) / questions.length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('성향 테스트'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: goPreviousQuestion,
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.softBeige,
-              color: AppColors.textDark,
-              minHeight: 8,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            const SizedBox(height: 18),
-
-            Text(
-              '${currentQuestionIndex + 1} / ${questions.length}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 18),
-
-            SoftCard(
-              backgroundColor: AppColors.softPink,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: WarmGradientBackground(
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+            children: [
+              Row(
                 children: [
-                  const Icon(
-                    Icons.favorite_rounded,
-                    color: AppColors.textDark,
-                    size: 38,
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 19),
+                    onPressed: goPreviousQuestion,
                   ),
-                  const SizedBox(height: 18),
-                  Text(
-                    question.text,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    '정답은 없어요. 지금의 나와 가장 가까운 쪽을 골라주세요.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            _AnswerButton(
-              text: '매우 그렇다',
-              onTap: () => selectAnswer(3),
-            ),
-            const SizedBox(height: 10),
-            _AnswerButton(
-              text: '그렇다',
-              onTap: () => selectAnswer(2),
-            ),
-            const SizedBox(height: 10),
-            _AnswerButton(
-              text: '아니다',
-              onTap: () => selectAnswer(1),
-            ),
-            const SizedBox(height: 10),
-            _AnswerButton(
-              text: '전혀 아니다',
-              onTap: () => selectAnswer(0),
-            ),
-
-            const SizedBox(height: 24),
-
-            SoftCard(
-              backgroundColor: AppColors.white,
-              hasShadow: false,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.info_outline_rounded,
-                    color: AppColors.textLight,
-                    size: 22,
-                  ),
-                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      '이 테스트는 전문 진단이 아니라 자기이해를 위한 참고용 질문이에요.',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      '나의 사이해 유형 알아보기',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
+                  const SizedBox(width: 48),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text('전문 진단이 아닌 참고용 자기이해 콘텐츠', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 24),
+              Text('Q${currentQuestionIndex + 1} / ${questions.length}', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 10),
+              LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(99),
+                backgroundColor: AppColors.softBeige.withOpacity(.75),
+                color: AppColors.blush,
+              ),
+              const SizedBox(height: 26),
+              SoftCard(
+                padding: const EdgeInsets.fromLTRB(16, 30, 16, 18),
+                child: Column(
+                  children: [
+                    const SpeechLogo(size: 58, compact: true),
+                    const SizedBox(height: 14),
+                    Text(
+                      question.text,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(height: 1.45),
+                    ),
+                    const SizedBox(height: 26),
+                    _AnswerButton(text: '전혀 그렇지 않아요', onTap: () => selectAnswer(0)),
+                    const SizedBox(height: 10),
+                    _AnswerButton(text: '조금 아닌 편이에요', onTap: () => selectAnswer(1)),
+                    const SizedBox(height: 10),
+                    _AnswerButton(text: '조금 그런 편이에요', isPrimary: true, onTap: () => selectAnswer(2)),
+                    const SizedBox(height: 10),
+                    _AnswerButton(text: '매우 그래요', onTap: () => selectAnswer(3)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                '답변을 누르면 바로 다음 질문으로 넘어가요.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
 class TestQuestion {
   final String text;
   final Map<String, int> typeScores;
@@ -287,10 +254,12 @@ class TestQuestion {
 class _AnswerButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
+  final bool isPrimary;
 
   const _AnswerButton({
     required this.text,
     required this.onTap,
+    this.isPrimary = false,
   });
 
   @override
@@ -298,8 +267,9 @@ class _AnswerButton extends StatelessWidget {
     return RoundedButton(
       text: text,
       onPressed: onTap,
-      backgroundColor: AppColors.white,
+      backgroundColor: isPrimary ? AppColors.softPink : AppColors.white,
       foregroundColor: AppColors.textDark,
+      outlined: !isPrimary,
     );
   }
 }

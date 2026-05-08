@@ -18,36 +18,42 @@ class EmotionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor =
-    isSelected ? AppColors.textDark : AppColors.softPink.withOpacity(0.65);
-
-    final textColor = isSelected ? AppColors.white : AppColors.textBrown;
-
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(14),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 10,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.textDark
-                : AppColors.softPink.withOpacity(0.4),
-          ),
+          color: isSelected ? AppColors.softPink.withOpacity(.9) : AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: isSelected ? AppColors.blush : AppColors.line, width: isSelected ? 1.4 : 1),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF9B6D55).withOpacity(.07),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
-        child: Text(
-          '$emoji $label',
-          style: TextStyle(
-            color: textColor,
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 15)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                color: AppColors.textDark,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+              ),
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 5),
+              const Icon(Icons.check_circle_rounded, color: AppColors.blush, size: 15),
+            ],
+          ],
         ),
       ),
     );
