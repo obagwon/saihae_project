@@ -208,7 +208,7 @@ class _SavedAnalysisContent extends StatelessWidget {
         const SizedBox(height: 18),
         ResultCard(type: type),
         const SizedBox(height: 18),
-        _ScoreSummary(scores: result.scores),
+        _ScoreSummary(scores: result.axisPercentages),
         const SizedBox(height: 22),
         RoundedButton(
           text: '다시 테스트하기',
@@ -281,6 +281,18 @@ class _ScoreSummary extends StatelessWidget {
 
   const _ScoreSummary({required this.scores});
 
+  String _labelFor(String key) {
+    const labels = {
+      'external': '외부 지향',
+      'internal': '내부 지향',
+      'realistic': '현실 감각',
+      'possibility': '가능성 탐색',
+      'logical': '논리 판단',
+      'relational': '관계 공감',
+    };
+    return labels[key] ?? key;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (scores.isEmpty) {
@@ -297,15 +309,12 @@ class _ScoreSummary extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '점수 요약',
+            '성향 축 비율',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),
           ...sortedScores.map((entry) {
-            final type = personalityTypes.firstWhere(
-              (item) => item.id == entry.key,
-              orElse: () => personalityTypes.first,
-            );
+            final label = _labelFor(entry.key);
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -314,12 +323,12 @@ class _ScoreSummary extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      type.id == entry.key ? type.name : entry.key,
+                      label,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                   Text(
-                    '${entry.value}점',
+                    '${entry.value}%',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),

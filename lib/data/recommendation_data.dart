@@ -109,10 +109,13 @@ class RecommendationData {
   };
 
   static const Map<String, String> _personalityNotes = {
-    'sunny_empath': '다른 사람을 챙기기 전에 내 마음도 같이 확인해보면 좋아요.',
-    'quiet_observer': '혼자 조용히 정리할 시간을 작게 확보하면 더 편안해질 수 있어요.',
-    'steady_realist': '실제로 할 수 있는 한 가지 행동으로 좁혀보면 부담이 줄어들어요.',
-    'free_explorer': '새로운 시도는 작게 시작할수록 더 즐겁게 이어질 수 있어요.',
-    'balanced_sensitive': '상대와 나의 마음을 함께 보되, 오늘은 내 쪽으로 조금 기울어도 괜찮아요.',
+    'field_captain': '지금 할 수 있는 한 가지 행동으로 좁히면 에너지를 덜 쓰고 움직일 수 있어요.',
+    'warm_coordinator': '다른 사람의 마음을 살피는 만큼 내 컨디션도 함께 확인해보면 좋아요.',
+    'idea_pathfinder': '떠오른 가능성을 작은 첫 단계로 바꾸면 부담 없이 시작할 수 있어요.',
+    'dream_weaver': '기대와 감정이 커질 때는 현실적인 약속 하나를 곁들이면 더 편안해요.',
+    'quiet_builder': '혼자 책임지기보다 필요한 범위를 작게 나누면 안정감이 커질 수 있어요.',
+    'gentle_keeper': '조용히 참은 마음이 있다면 부드러운 문장으로 조금만 꺼내봐도 좋아요.',
+    'inner_strategist': '생각이 길어질 때는 오늘 실행할 수 있는 가장 작은 단서를 표시해보세요.',
+    'soft_lantern': '상상한 마음을 글이나 색으로 꺼내면 감정이 조금 더 선명해질 수 있어요.',
   };
 }

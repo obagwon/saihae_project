@@ -20,13 +20,15 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   int currentQuestionIndex = 0;
-  final List<int> answers = [];
+  late final List<int?> answers = List<int?>.filled(questions.length, null);
 
   final List<TestQuestion> questions = testQuestions;
   final PersonalityTestService testService = const PersonalityTestService();
 
   void selectAnswer(int score) {
-    answers.add(score);
+    setState(() {
+      answers[currentQuestionIndex] = score;
+    });
 
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
@@ -67,7 +69,6 @@ class _TestScreenState extends State<TestScreen> {
 
     setState(() {
       currentQuestionIndex--;
-      answers.removeLast();
     });
   }
 
@@ -121,7 +122,7 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '정답은 없어요. 지금의 나와 가장 가까운 쪽을 골라주세요.',
+                    '정답은 없어요. 오늘의 나와 가장 가까운 쪽을 골라주세요.',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -130,24 +131,23 @@ class _TestScreenState extends State<TestScreen> {
 
             const SizedBox(height: 24),
 
-            _AnswerButton(
-              text: '매우 그렇다',
-              onTap: () => selectAnswer(3),
-            ),
-            const SizedBox(height: 10),
-            _AnswerButton(
-              text: '그렇다',
-              onTap: () => selectAnswer(2),
-            ),
-            const SizedBox(height: 10),
-            _AnswerButton(
-              text: '아니다',
-              onTap: () => selectAnswer(1),
-            ),
-            const SizedBox(height: 10),
-            _AnswerButton(
-              text: '전혀 아니다',
-              onTap: () => selectAnswer(0),
+            ...answerOptions.map((option) {
+              final isSelected = answers[currentQuestionIndex] == option.score;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _AnswerButton(
+                  text: option.label,
+                  isSelected: isSelected,
+                  onTap: () => selectAnswer(option.score),
+                ),
+              );
+            }),
+
+            Center(
+              child: Text(
+                currentQuestionIndex == questions.length - 1 ? '결과 보기' : '답변을 선택하면 다음 문항으로 이동해요',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
 
             const SizedBox(height: 24),
@@ -193,10 +193,12 @@ class TestCalculationResult {
 class _AnswerButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
+  final bool isSelected;
 
   const _AnswerButton({
     required this.text,
     required this.onTap,
+    required this.isSelected,
   });
 
   @override
@@ -204,8 +206,9 @@ class _AnswerButton extends StatelessWidget {
     return RoundedButton(
       text: text,
       onPressed: onTap,
-      backgroundColor: AppColors.white,
-      foregroundColor: AppColors.textDark,
+      icon: isSelected ? Icons.check_circle_rounded : null,
+      backgroundColor: isSelected ? AppColors.textDark : AppColors.white,
+      foregroundColor: isSelected ? AppColors.white : AppColors.textDark,
     );
   }
 }
