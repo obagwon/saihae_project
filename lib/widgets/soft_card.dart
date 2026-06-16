@@ -30,12 +30,12 @@ class SoftCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: hasShadow
             ? [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ]
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ]
             : [],
       ),
       child: child,

@@ -1,23 +1,77 @@
 import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
+import '../models/personality_test_result.dart';
 import '../models/personality_type.dart';
+import '../services/local_storage_service.dart';
 import '../widgets/result_card.dart';
 import '../widgets/rounded_button.dart';
 import '../widgets/section_title.dart';
 import '../widgets/soft_card.dart';
 import 'test_screen.dart';
 
-class ResultScreen extends StatelessWidget {
+class ResultScreen extends StatefulWidget {
   final PersonalityType resultType;
+  final PersonalityTestResult testResult;
 
   const ResultScreen({
     super.key,
     required this.resultType,
+    required this.testResult,
   });
 
   @override
+  State<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen> {
+  final LocalStorageService storageService = LocalStorageService();
+  bool hasSavedResult = false;
+  bool saveFailed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      saveResult();
+    });
+  }
+
+  Future<void> saveResult() async {
+    try {
+      await storageService.savePersonalityTestResult(widget.testResult);
+    } on Object {
+      if (!mounted) return;
+
+      setState(() {
+        saveFailed = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('결과를 저장하지 못했지만 화면에서 바로 확인할 수 있어요.'),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      hasSavedResult = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('성향 테스트 결과가 저장되었어요.'),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final resultType = widget.resultType;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('나의 결과'),
@@ -38,6 +92,11 @@ class ResultScreen extends StatelessWidget {
               Text(
                 '결과는 고정된 성격이 아니라, 현재 나를 이해하기 위한 참고용 가이드로 봐주세요.',
                 style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 12),
+              _SavedResultNotice(
+                hasSavedResult: hasSavedResult,
+                saveFailed: saveFailed,
               ),
               const SizedBox(height: 24),
 
@@ -144,6 +203,49 @@ class ResultScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SavedResultNotice extends StatelessWidget {
+  final bool hasSavedResult;
+  final bool saveFailed;
+
+  const _SavedResultNotice({
+    required this.hasSavedResult,
+    required this.saveFailed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SoftCard(
+      backgroundColor: AppColors.white,
+      hasShadow: false,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            hasSavedResult
+                ? Icons.check_circle_rounded
+                : saveFailed
+                    ? Icons.info_outline_rounded
+                    : Icons.sync_rounded,
+            color: AppColors.textLight,
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              hasSavedResult
+                  ? '이 결과가 기기에 저장되었어요. 앱을 다시 열어도 최근 결과를 불러올 수 있어요.'
+                  : saveFailed
+                      ? '결과 저장은 실패했지만 지금 화면에서 결과를 확인할 수 있어요.'
+                      : '결과를 기기에 저장하는 중이에요.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
       ),
     );
   }

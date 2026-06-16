@@ -10,18 +10,25 @@ import '../widgets/soft_card.dart';
 import 'test_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final ValueChanged<String> onStartRecord;
+
+  const HomeScreen({
+    super.key,
+    required this.onStartRecord,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int selectedEmotionIndex = 0;
+  int? selectedEmotionIndex;
 
   @override
   Widget build(BuildContext context) {
-    final selectedEmotion = emotionGuides[selectedEmotionIndex];
+    final selectedEmotion = selectedEmotionIndex == null
+        ? null
+        : emotionGuides[selectedEmotionIndex!];
     final todayTip = mentalTips[DateTime.now().day % mentalTips.length];
 
     return SingleChildScrollView(
@@ -47,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _IconBadge(
                   icon: Icons.mood_rounded,
-                  backgroundColor: Colors.white.withOpacity(0.75),
+                  backgroundColor: Colors.white.withValues(alpha: 0.75),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -89,30 +96,43 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.72),
+                    color: Colors.white.withValues(alpha: 0.72),
                     borderRadius: BorderRadius.circular(22),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${selectedEmotion.emoji} ${selectedEmotion.name}',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        selectedEmotion.message,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        selectedEmotion.tip,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
+                  child: selectedEmotion == null
+                      ? Text(
+                          '감정을 선택하면 지금 마음에 맞는 안내와 기록 버튼이 보여요.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${selectedEmotion.emoji} ${selectedEmotion.name}',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              selectedEmotion.message,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              selectedEmotion.tip,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            RoundedButton(
+                              text: '이 감정으로 기록하기',
+                              icon: Icons.edit_note_rounded,
+                              onPressed: () {
+                                widget.onStartRecord(selectedEmotion.id);
+                              },
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
@@ -132,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _IconBadge(
                   icon: Icons.auto_awesome_rounded,
-                  backgroundColor: Colors.white.withOpacity(0.75),
+                  backgroundColor: Colors.white.withValues(alpha: 0.75),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -149,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.65),
+                    color: Colors.white.withValues(alpha: 0.65),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -188,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _IconBadge(
                   icon: Icons.favorite_rounded,
-                  backgroundColor: Colors.white.withOpacity(0.75),
+                  backgroundColor: Colors.white.withValues(alpha: 0.75),
                 ),
                 const SizedBox(height: 16),
                 Text(
