@@ -15,17 +15,26 @@ class MainTabScreen extends StatefulWidget {
 
 class _MainTabScreenState extends State<MainTabScreen> {
   int _selectedIndex = 0;
-
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    AnalysisScreen(),
-    RelationGuideScreen(),
-    RecordScreen(),
-  ];
+  String? _initialRecordEmotionId;
 
   void _onTapBottomItem(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  void _startRecordFromHome(String emotionId) {
+    setState(() {
+      _selectedIndex = 3;
+      _initialRecordEmotionId = emotionId;
+    });
+  }
+
+  void _clearInitialRecordEmotion() {
+    if (_initialRecordEmotionId == null) return;
+
+    setState(() {
+      _initialRecordEmotionId = null;
     });
   }
 
@@ -50,13 +59,24 @@ class _MainTabScreenState extends State<MainTabScreen> {
       appBar: AppBar(
         title: Text(_getTitle()),
       ),
-      body: _screens[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          HomeScreen(onStartRecord: _startRecordFromHome),
+          const AnalysisScreen(),
+          const RelationGuideScreen(),
+          RecordScreen(
+            initialEmotionId: _initialRecordEmotionId,
+            onInitialEmotionConsumed: _clearInitialRecordEmotion,
+          ),
+        ],
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),

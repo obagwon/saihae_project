@@ -65,7 +65,7 @@ class ResultCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -107,7 +107,7 @@ class _ResultInfoBlock extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white.withOpacity(0.55),
+        color: AppColors.white.withValues(alpha: 0.55),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
