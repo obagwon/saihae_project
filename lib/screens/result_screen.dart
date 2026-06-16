@@ -102,11 +102,15 @@ class _ResultScreenState extends State<ResultScreen> {
 
               ResultCard(type: resultType),
 
+              const SizedBox(height: 18),
+
+              _AxisRatioCard(percentages: widget.testResult.axisPercentages),
+
               const SizedBox(height: 24),
 
               SectionTitle(
-                title: '가까워지는 방법',
-                description: '${resultType.name}과 편안하게 가까워지는 힌트예요.',
+                title: '관계에서의 모습',
+                description: '${resultType.name}의 관계 힌트예요.',
               ),
 
               SoftCard(
@@ -174,6 +178,14 @@ class _ResultScreenState extends State<ResultScreen> {
                 ),
               ),
 
+              const SizedBox(height: 18),
+
+              const SoftCard(
+                backgroundColor: AppColors.white,
+                hasShadow: false,
+                child: Text('이 결과는 전문적인 심리 진단이 아닌, 일상 속 자기이해를 위한 참고용 결과입니다.'),
+              ),
+
               const SizedBox(height: 24),
 
               RoundedButton(
@@ -203,6 +215,59 @@ class _ResultScreenState extends State<ResultScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AxisRatioCard extends StatelessWidget {
+  final Map<String, int> percentages;
+
+  const _AxisRatioCard({required this.percentages});
+
+  @override
+  Widget build(BuildContext context) {
+    if (percentages.isEmpty) return const SizedBox.shrink();
+
+    return SoftCard(
+      backgroundColor: AppColors.white,
+      hasShadow: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('성향 축 비율', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          _AxisRatioRow(leftLabel: '외부 지향', rightLabel: '내부 지향', left: percentages['external'] ?? 50, right: percentages['internal'] ?? 50),
+          _AxisRatioRow(leftLabel: '현실 감각', rightLabel: '가능성 탐색', left: percentages['realistic'] ?? 50, right: percentages['possibility'] ?? 50),
+          _AxisRatioRow(leftLabel: '논리 판단', rightLabel: '관계 공감', left: percentages['logical'] ?? 50, right: percentages['relational'] ?? 50),
+        ],
+      ),
+    );
+  }
+}
+
+class _AxisRatioRow extends StatelessWidget {
+  final String leftLabel;
+  final String rightLabel;
+  final int left;
+  final int right;
+
+  const _AxisRatioRow({required this.leftLabel, required this.rightLabel, required this.left, required this.right});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$leftLabel $left% / $rightLabel $right%', style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: LinearProgressIndicator(value: left / 100, minHeight: 8, backgroundColor: AppColors.softBeige, color: AppColors.textDark),
+          ),
+        ],
       ),
     );
   }

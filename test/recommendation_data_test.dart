@@ -6,7 +6,7 @@ void main() {
     final recommendation = RecommendationData.buildRecommendation(
       emotionId: 'anxious',
       intensity: 5,
-      personalityTypeId: 'steady_realist',
+      personalityTypeId: 'quiet_builder',
     );
 
     expect(recommendation.title, contains('회복 모드'));
