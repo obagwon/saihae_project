@@ -365,6 +365,8 @@ class _EmotionDashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedEmotion = this.selectedEmotion;
+
     return SoftCard(
       tone: SoftCardTone.surface,
       child: Column(
