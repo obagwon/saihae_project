@@ -603,7 +603,7 @@ class _PersonalityTypeImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      _personalityCardImagePath(type),
+      _relationPersonalityCardImagePath(type),
       fit: fit,
       width: width,
       height: height,
@@ -627,17 +627,17 @@ class _PersonalityTypeImageFallback extends StatelessWidget {
       height: double.infinity,
       color: AppColors.white.withValues(alpha: 0.62),
       child: Center(
-        child: Icon(_iconForType(type), color: AppColors.navy, size: 38),
+        child: Icon(_relationIconForType(type), color: AppColors.navy, size: 38),
       ),
     );
   }
 }
 
-String _personalityCardImagePath(PersonalityType type) {
+String _relationPersonalityCardImagePath(PersonalityType type) {
   return 'images/personality_cards/${type.id}.png';
 }
 
-IconData _iconForType(PersonalityType type) {
+IconData _relationIconForType(PersonalityType type) {
   switch (type.icon) {
     case IconDataCode.compass:
       return Icons.explore_rounded;
@@ -748,7 +748,7 @@ class _RelationshipMatchTile extends StatelessWidget {
             child: Icon(
               matchedType == null
                   ? Icons.favorite_border_rounded
-                  : _iconForType(matchedType),
+                  : _relationIconForType(matchedType),
               color: AppColors.navy,
               size: 21,
             ),
