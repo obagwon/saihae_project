@@ -138,24 +138,15 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
           title: '전체 성향별 관계 카드',
           description: '다른 성향과 편안하게 가까워지는 방법도 함께 살펴보세요.',
         ),
-        ...List.generate(personalityTypes.length, (index) {
-          final type = personalityTypes[index];
-
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: index == personalityTypes.length - 1 ? 0 : 16,
-            ),
-            child: _RelationTypeCard(
-              type: type,
-              backgroundColor: _getCardColor(index),
-            ),
-          );
-        }),
+        const SizedBox(height: AppSpacing.md),
+        _RelationTypeGrid(
+          types: personalityTypes,
+          cardColorForIndex: _getCardColor,
+        ),
       ],
     );
   }
 }
-
 
 class _ComparePreviewCard extends StatelessWidget {
   final PersonalityType? myType;
@@ -248,11 +239,22 @@ class _CompareMiniCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.navy)),
+          Text(
+            label,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: AppColors.navy),
+          ),
           const SizedBox(height: AppSpacing.xxs),
           Text(title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.xxs),
-          Text(description, maxLines: 3, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            description,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       ),
     );
@@ -375,57 +377,266 @@ class _EmptyMyRelationGuideCard extends StatelessWidget {
   }
 }
 
-class _RelationTypeCard extends StatelessWidget {
+class _RelationTypeGrid extends StatelessWidget {
+  final List<PersonalityType> types;
+  final Color Function(int index) cardColorForIndex;
+
+  const _RelationTypeGrid({
+    required this.types,
+    required this.cardColorForIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: types.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: AppSpacing.sm,
+        mainAxisSpacing: AppSpacing.sm,
+        mainAxisExtent: 236,
+      ),
+      itemBuilder: (context, index) {
+        final type = types[index];
+
+        return _RelationTypePreviewCard(
+          type: type,
+          backgroundColor: cardColorForIndex(index),
+          onTap: () => _showRelationTypeDetailSheet(context, type),
+        );
+      },
+    );
+  }
+}
+
+class _RelationTypePreviewCard extends StatelessWidget {
   final PersonalityType type;
   final Color backgroundColor;
+  final VoidCallback onTap;
 
-  const _RelationTypeCard({
+  const _RelationTypePreviewCard({
     required this.type,
     required this.backgroundColor,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return SoftCard(
       backgroundColor: backgroundColor,
+      borderRadius: AppRadii.compactCard,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: _PersonalityTypeImage(
+                type: type,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             type.name,
-            style: Theme.of(context).textTheme.titleLarge,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             type.subtitle,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 16),
-
-          _MiniSection(
-            icon: Icons.favorite_rounded,
-            title: '이런 사람과 잘 맞아요',
-            items: type.goodMatches,
-          ),
-
-          const SizedBox(height: 16),
-
-          _MiniSection(
-            icon: Icons.tips_and_updates_rounded,
-            title: '친해지는 방법',
-            items: type.relationTips,
-          ),
-
-          const SizedBox(height: 16),
-
-          _MiniSection(
-            icon: Icons.spa_rounded,
-            title: '조심하면 좋은 부분',
-            items: type.avoidTips,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),
     );
+  }
+}
+
+Future<void> _showRelationTypeDetailSheet(
+  BuildContext context,
+  PersonalityType type,
+) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => _RelationTypeDetailSheet(type: type),
+  );
+}
+
+class _RelationTypeDetailSheet extends StatelessWidget {
+  final PersonalityType type;
+
+  const _RelationTypeDetailSheet({required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.78,
+      minChildSize: 0.48,
+      maxChildSize: 0.92,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.cream,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.sm,
+              AppSpacing.screenHorizontal,
+              AppSpacing.xl,
+            ),
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.line,
+                    borderRadius: BorderRadius.circular(AppRadii.chip),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton.filledTonal(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                  tooltip: '닫기',
+                ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadii.card),
+                child: AspectRatio(
+                  aspectRatio: 16 / 10,
+                  child: _PersonalityTypeImage(
+                    type: type,
+                    fit: BoxFit.contain,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                type.name,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                type.subtitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _MiniSection(
+                icon: Icons.favorite_rounded,
+                title: '이런 사람과 잘 맞아요',
+                items: type.goodMatches,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _MiniSection(
+                icon: Icons.tips_and_updates_rounded,
+                title: '친해지는 방법',
+                items: type.relationTips,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _MiniSection(
+                icon: Icons.spa_rounded,
+                title: '조심하면 좋은 부분',
+                items: type.avoidTips,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PersonalityTypeImage extends StatelessWidget {
+  final PersonalityType type;
+  final BoxFit fit;
+  final double width;
+  final double height;
+
+  const _PersonalityTypeImage({
+    required this.type,
+    required this.fit,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      _personalityCardImagePath(type),
+      fit: fit,
+      width: width,
+      height: height,
+      semanticLabel: '${type.name} 관계 카드 이미지',
+      errorBuilder: (context, error, stackTrace) {
+        return _PersonalityTypeImageFallback(type: type);
+      },
+    );
+  }
+}
+
+class _PersonalityTypeImageFallback extends StatelessWidget {
+  final PersonalityType type;
+
+  const _PersonalityTypeImageFallback({required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: AppColors.white.withValues(alpha: 0.62),
+      child: Center(
+        child: Icon(_iconForType(type), color: AppColors.navy, size: 38),
+      ),
+    );
+  }
+}
+
+String _personalityCardImagePath(PersonalityType type) {
+  return 'images/personality_cards/${type.id}.png';
+}
+
+IconData _iconForType(PersonalityType type) {
+  switch (type.icon) {
+    case IconDataCode.compass:
+      return Icons.explore_rounded;
+    case IconDataCode.heart:
+      return Icons.favorite_rounded;
+    case IconDataCode.spark:
+      return Icons.auto_awesome_rounded;
+    case IconDataCode.rainbow:
+      return Icons.wb_sunny_rounded;
+    case IconDataCode.anchor:
+      return Icons.anchor_rounded;
+    case IconDataCode.nest:
+      return Icons.spa_rounded;
+    case IconDataCode.moon:
+      return Icons.nightlight_round;
+    case IconDataCode.lantern:
+      return Icons.emoji_objects_rounded;
   }
 }
 
