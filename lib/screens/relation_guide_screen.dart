@@ -776,6 +776,31 @@ class _RelationshipMatchTile extends StatelessWidget {
   }
 }
 
+String _personalityCardImagePath(PersonalityType type) {
+  return 'images/personality_cards/${type.id}.png';
+}
+
+IconData _iconForType(PersonalityType type) {
+  switch (type.icon) {
+    case IconDataCode.compass:
+      return Icons.explore_rounded;
+    case IconDataCode.heart:
+      return Icons.favorite_rounded;
+    case IconDataCode.spark:
+      return Icons.auto_awesome_rounded;
+    case IconDataCode.rainbow:
+      return Icons.wb_sunny_rounded;
+    case IconDataCode.anchor:
+      return Icons.anchor_rounded;
+    case IconDataCode.nest:
+      return Icons.spa_rounded;
+    case IconDataCode.moon:
+      return Icons.nightlight_round;
+    case IconDataCode.lantern:
+      return Icons.emoji_objects_rounded;
+  }
+}
+
 class _MiniSection extends StatelessWidget {
   final IconData icon;
   final String title;
