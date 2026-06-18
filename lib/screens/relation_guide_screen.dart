@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
 import '../data/personality_data.dart';
+import '../data/personality_match_data.dart';
+import '../models/personality_match.dart';
 import '../models/personality_test_result.dart';
 import '../models/personality_type.dart';
 import '../services/local_storage_service.dart';
@@ -138,24 +140,15 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
           title: '전체 성향별 관계 카드',
           description: '다른 성향과 편안하게 가까워지는 방법도 함께 살펴보세요.',
         ),
-        ...List.generate(personalityTypes.length, (index) {
-          final type = personalityTypes[index];
-
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: index == personalityTypes.length - 1 ? 0 : 16,
-            ),
-            child: _RelationTypeCard(
-              type: type,
-              backgroundColor: _getCardColor(index),
-            ),
-          );
-        }),
+        const SizedBox(height: AppSpacing.md),
+        _RelationTypeGrid(
+          types: personalityTypes,
+          cardColorForIndex: _getCardColor,
+        ),
       ],
     );
   }
 }
-
 
 class _ComparePreviewCard extends StatelessWidget {
   final PersonalityType? myType;
@@ -248,11 +241,22 @@ class _CompareMiniCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.navy)),
+          Text(
+            label,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: AppColors.navy),
+          ),
           const SizedBox(height: AppSpacing.xxs),
           Text(title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.xxs),
-          Text(description, maxLines: 3, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            description,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       ),
     );
@@ -375,53 +379,396 @@ class _EmptyMyRelationGuideCard extends StatelessWidget {
   }
 }
 
-class _RelationTypeCard extends StatelessWidget {
+class _RelationTypeGrid extends StatelessWidget {
+  final List<PersonalityType> types;
+  final Color Function(int index) cardColorForIndex;
+
+  const _RelationTypeGrid({
+    required this.types,
+    required this.cardColorForIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: types.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: AppSpacing.sm,
+        mainAxisSpacing: AppSpacing.sm,
+        mainAxisExtent: 236,
+      ),
+      itemBuilder: (context, index) {
+        final type = types[index];
+
+        return _RelationTypePreviewCard(
+          type: type,
+          backgroundColor: cardColorForIndex(index),
+          onTap: () => _showRelationTypeDetailSheet(context, type),
+        );
+      },
+    );
+  }
+}
+
+class _RelationTypePreviewCard extends StatelessWidget {
   final PersonalityType type;
   final Color backgroundColor;
+  final VoidCallback onTap;
 
-  const _RelationTypeCard({
+  const _RelationTypePreviewCard({
     required this.type,
     required this.backgroundColor,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return SoftCard(
       backgroundColor: backgroundColor,
+      borderRadius: AppRadii.compactCard,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: _PersonalityTypeImage(
+                type: type,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             type.name,
-            style: Theme.of(context).textTheme.titleLarge,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             type.subtitle,
-            style: Theme.of(context).textTheme.bodyMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+}
 
-          _MiniSection(
-            icon: Icons.favorite_rounded,
-            title: '이런 사람과 잘 맞아요',
-            items: type.goodMatches,
+Future<void> _showRelationTypeDetailSheet(
+  BuildContext context,
+  PersonalityType type,
+) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => _RelationTypeDetailSheet(type: type),
+  );
+}
+
+class _RelationTypeDetailSheet extends StatelessWidget {
+  final PersonalityType type;
+
+  const _RelationTypeDetailSheet({required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.78,
+      minChildSize: 0.48,
+      maxChildSize: 0.92,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.cream,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
           ),
-
-          const SizedBox(height: 16),
-
-          _MiniSection(
-            icon: Icons.tips_and_updates_rounded,
-            title: '친해지는 방법',
-            items: type.relationTips,
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.sm,
+              AppSpacing.screenHorizontal,
+              AppSpacing.xl,
+            ),
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.line,
+                    borderRadius: BorderRadius.circular(AppRadii.chip),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton.filledTonal(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                  tooltip: '닫기',
+                ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadii.card),
+                child: AspectRatio(
+                  aspectRatio: 16 / 10,
+                  child: _PersonalityTypeImage(
+                    type: type,
+                    fit: BoxFit.contain,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                type.name,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                type.subtitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              if (_relationshipMatchFor(type) case final match?) ...[
+                _RelationshipMatchSection(
+                  title: '잘 맞는 성향',
+                  icon: Icons.favorite_rounded,
+                  matches: match.bestMatches,
+                  toneColor: AppColors.softPink,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _RelationshipMatchSection(
+                  title: '노력하면 좋은 성향',
+                  icon: Icons.handshake_rounded,
+                  matches: match.growthMatches,
+                  toneColor: AppColors.lavender,
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+              _MiniSection(
+                icon: Icons.favorite_rounded,
+                title: '이런 사람과 잘 맞아요',
+                items: type.goodMatches,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _MiniSection(
+                icon: Icons.tips_and_updates_rounded,
+                title: '친해지는 방법',
+                items: type.relationTips,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _MiniSection(
+                icon: Icons.spa_rounded,
+                title: '조심하면 좋은 부분',
+                items: type.avoidTips,
+              ),
+            ],
           ),
+        );
+      },
+    );
+  }
+}
 
-          const SizedBox(height: 16),
+class _PersonalityTypeImage extends StatelessWidget {
+  final PersonalityType type;
+  final BoxFit fit;
+  final double width;
+  final double height;
 
-          _MiniSection(
-            icon: Icons.spa_rounded,
-            title: '조심하면 좋은 부분',
-            items: type.avoidTips,
+  const _PersonalityTypeImage({
+    required this.type,
+    required this.fit,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      _personalityCardImagePath(type),
+      fit: fit,
+      width: width,
+      height: height,
+      semanticLabel: '${type.name} 관계 카드 이미지',
+      errorBuilder: (context, error, stackTrace) {
+        return _PersonalityTypeImageFallback(type: type);
+      },
+    );
+  }
+}
+
+class _PersonalityTypeImageFallback extends StatelessWidget {
+  final PersonalityType type;
+
+  const _PersonalityTypeImageFallback({required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: AppColors.white.withValues(alpha: 0.62),
+      child: Center(
+        child: Icon(_iconForType(type), color: AppColors.navy, size: 38),
+      ),
+    );
+  }
+}
+
+String _personalityCardImagePath(PersonalityType type) {
+  return 'images/personality_cards/${type.id}.png';
+}
+
+IconData _iconForType(PersonalityType type) {
+  switch (type.icon) {
+    case IconDataCode.compass:
+      return Icons.explore_rounded;
+    case IconDataCode.heart:
+      return Icons.favorite_rounded;
+    case IconDataCode.spark:
+      return Icons.auto_awesome_rounded;
+    case IconDataCode.rainbow:
+      return Icons.wb_sunny_rounded;
+    case IconDataCode.anchor:
+      return Icons.anchor_rounded;
+    case IconDataCode.nest:
+      return Icons.spa_rounded;
+    case IconDataCode.moon:
+      return Icons.nightlight_round;
+    case IconDataCode.lantern:
+      return Icons.emoji_objects_rounded;
+  }
+}
+
+PersonalityRelationshipMatch? _relationshipMatchFor(PersonalityType type) {
+  return personalityRelationshipMatches[type.id];
+}
+
+PersonalityType? _findTypeById(String typeId) {
+  for (final type in personalityTypes) {
+    if (type.id == typeId) {
+      return type;
+    }
+  }
+
+  return null;
+}
+
+class _RelationshipMatchSection extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final List<PersonalityMatch> matches;
+  final Color toneColor;
+
+  const _RelationshipMatchSection({
+    required this.title,
+    required this.icon,
+    required this.matches,
+    required this.toneColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: toneColor.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(AppRadii.compactCard),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.72)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 21, color: AppColors.textDark),
+              const SizedBox(width: AppSpacing.xs),
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ...matches.map(
+            (match) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: _RelationshipMatchTile(match: match),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RelationshipMatchTile extends StatelessWidget {
+  final PersonalityMatch match;
+
+  const _RelationshipMatchTile({required this.match});
+
+  @override
+  Widget build(BuildContext context) {
+    final matchedType = _findTypeById(match.typeId);
+    final matchedTypeName = matchedType?.name ?? '알 수 없는 성향';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.74),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: AppColors.cream,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              matchedType == null
+                  ? Icons.favorite_border_rounded
+                  : _iconForType(matchedType),
+              color: AppColors.navy,
+              size: 21,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  matchedTypeName,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  match.reason,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
           ),
         ],
       ),
