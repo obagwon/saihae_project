@@ -15,7 +15,7 @@ class RecommendationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SoftCard(
-      backgroundColor: AppColors.softPeach.withValues(alpha: 0.7),
+      tone: SoftCardTone.peach,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -26,12 +26,12 @@ class RecommendationCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.75),
+                  color: context.palette.card.withValues(alpha: 0.75),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.auto_awesome_rounded,
-                  color: AppColors.textDark,
+                  color: context.palette.textPrimary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -58,7 +58,7 @@ class RecommendationCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.72),
+              color: context.palette.card.withValues(alpha: 0.72),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Text(
@@ -80,7 +80,7 @@ class RecommendationCard extends StatelessWidget {
             Text(
               recommendation.safetyNote!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textBrown,
+                    color: context.palette.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
             ),

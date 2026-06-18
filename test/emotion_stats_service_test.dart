@@ -52,4 +52,13 @@ void main() {
     expect(stats.mostFrequentEmotion?.emotionId, 'calm');
     expect(stats.recentSevenDayAverageIntensity, 3);
   });
+
+  test('emotionTemperatureFromIntensity uses Saihae temperature formula', () {
+    expect(emotionTemperatureFromIntensity(1), 30.5);
+    expect(emotionTemperatureFromIntensity(2), 33.5);
+    expect(emotionTemperatureFromIntensity(3), 36.5);
+    expect(emotionTemperatureFromIntensity(4), 39.5);
+    expect(emotionTemperatureFromIntensity(5), 42.5);
+    expect(emotionTemperatureFromIntensity(3.5), 38.0);
+  });
 }

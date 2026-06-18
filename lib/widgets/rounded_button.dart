@@ -26,12 +26,12 @@ class RoundedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _colorsForVariant();
+    final colors = _colorsForVariant(context);
     final style = ElevatedButton.styleFrom(
       backgroundColor: backgroundColor ?? colors.$1,
       foregroundColor: foregroundColor ?? colors.$2,
-      disabledBackgroundColor: AppColors.softBeige,
-      disabledForegroundColor: AppColors.textLight,
+      disabledBackgroundColor: context.palette.notice,
+      disabledForegroundColor: context.palette.textMuted,
       elevation: 0,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       shape: RoundedRectangleBorder(
@@ -58,16 +58,23 @@ class RoundedButton extends StatelessWidget {
     return SizedBox(width: double.infinity, child: button);
   }
 
-  (Color, Color, Color) _colorsForVariant() {
+  (Color, Color, Color) _colorsForVariant(BuildContext context) {
+    final palette = context.palette;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     switch (variant) {
       case RoundedButtonVariant.primary:
-        return (AppColors.navy, AppColors.white, AppColors.navy);
+        return (
+          palette.primary,
+          isDark ? AppColors.textDark : AppColors.white,
+          palette.primary,
+        );
       case RoundedButtonVariant.secondary:
-        return (AppColors.white, AppColors.textDark, AppColors.line);
+        return (palette.card, palette.textPrimary, palette.line);
       case RoundedButtonVariant.tonal:
-        return (AppColors.blush, AppColors.navy, AppColors.softPink);
+        return (palette.blush, palette.primary, palette.line);
       case RoundedButtonVariant.ghost:
-        return (Colors.transparent, AppColors.textBrown, Colors.transparent);
+        return (Colors.transparent, palette.textSecondary, Colors.transparent);
     }
   }
 }

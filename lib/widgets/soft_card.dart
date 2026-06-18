@@ -26,15 +26,24 @@ class SoftCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final radius = BorderRadius.circular(borderRadius);
     final card = Container(
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor ?? _toneColor(),
+        color: _resolveColor(context),
         borderRadius: radius,
-        border: Border.all(color: _borderColor()),
-        boxShadow: hasShadow ? AppShadows.soft : [],
+        border: Border.all(color: _borderColor(palette)),
+        boxShadow: hasShadow
+            ? [
+                BoxShadow(
+                  color: palette.shadow,
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ]
+            : [],
       ),
       child: child,
     );
@@ -51,32 +60,49 @@ class SoftCard extends StatelessWidget {
     );
   }
 
-  Color _toneColor() {
+  Color _resolveColor(BuildContext context) {
+    final palette = context.palette;
+    final color = backgroundColor;
+
+    if (color == AppColors.white) return palette.card;
+    if (color == AppColors.cream) return palette.background;
+    if (color == AppColors.warmIvory) return palette.hero;
+    if (color == AppColors.blush) return palette.blush;
+    if (color == AppColors.sky) return palette.sky;
+    if (color == AppColors.lavender) return palette.lavender;
+    if (color == AppColors.softPeach) return palette.peach;
+    if (color == AppColors.mint) return palette.mint;
+    if (color == AppColors.softBeige) return palette.notice;
+
+    return color ?? _toneColor(palette);
+  }
+
+  Color _toneColor(AppPalette palette) {
     switch (tone) {
       case SoftCardTone.surface:
-        return AppColors.white;
+        return palette.card;
       case SoftCardTone.hero:
-        return AppColors.warmIvory;
+        return palette.hero;
       case SoftCardTone.blush:
-        return AppColors.blush;
+        return palette.blush;
       case SoftCardTone.sky:
-        return AppColors.sky;
+        return palette.sky;
       case SoftCardTone.lavender:
-        return AppColors.lavender;
+        return palette.lavender;
       case SoftCardTone.peach:
-        return AppColors.softPeach;
+        return palette.peach;
       case SoftCardTone.mint:
-        return AppColors.mint;
+        return palette.mint;
       case SoftCardTone.notice:
-        return AppColors.white.withValues(alpha: 0.72);
+        return palette.notice;
     }
   }
 
-  Color _borderColor() {
+  Color _borderColor(AppPalette palette) {
     if (tone == SoftCardTone.notice || backgroundColor == AppColors.white) {
-      return AppColors.line.withValues(alpha: 0.7);
+      return palette.line.withValues(alpha: 0.7);
     }
 
-    return AppColors.white.withValues(alpha: 0.72);
+    return palette.line.withValues(alpha: 0.45);
   }
 }

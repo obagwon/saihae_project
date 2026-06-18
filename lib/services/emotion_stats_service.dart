@@ -45,6 +45,10 @@ class DailyIntensityStat {
   });
 }
 
+double emotionTemperatureFromIntensity(num intensity) {
+  return 36.5 + (intensity - 3) * 3;
+}
+
 class EmotionStatsService {
   const EmotionStatsService();
 

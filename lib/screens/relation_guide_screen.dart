@@ -6,6 +6,7 @@ import '../data/personality_match_data.dart';
 import '../models/personality_match.dart';
 import '../models/personality_test_result.dart';
 import '../models/personality_type.dart';
+import '../models/test_question.dart';
 import '../services/local_storage_service.dart';
 import '../widgets/rounded_button.dart';
 import '../widgets/section_title.dart';
@@ -24,6 +25,7 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
 
   PersonalityTestResult? savedResult;
   PersonalityType? savedType;
+  PersonalityType? selectedPartnerType;
   bool isLoading = true;
   bool isReloading = false;
 
@@ -55,6 +57,9 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
     setState(() {
       savedResult = result;
       savedType = type;
+      if (type != null && selectedPartnerType == null) {
+        selectedPartnerType = _suggestedType(type);
+      }
       isLoading = false;
       isReloading = false;
     });
@@ -88,6 +93,43 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
   PersonalityType _suggestedType(PersonalityType type) {
     final index = personalityTypes.indexWhere((item) => item.id == type.id);
     return personalityTypes[(index + 1) % personalityTypes.length];
+  }
+
+  Future<void> openPartnerTypeSheet() async {
+    final selectedType = await showModalBottomSheet<PersonalityType>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _PartnerTypePickerSheet(
+        selectedType: selectedPartnerType,
+      ),
+    );
+
+    if (!mounted || selectedType == null) return;
+
+    setState(() {
+      selectedPartnerType = selectedType;
+    });
+  }
+
+  Future<void> openRelationshipCompareSheet() {
+    final myType = savedType;
+    final partnerType = selectedPartnerType ??
+        (myType == null ? null : _suggestedType(myType));
+
+    if (myType == null || partnerType == null) {
+      return Future.value();
+    }
+
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _RelationshipCompareSheet(
+        myType: myType,
+        partnerType: partnerType,
+      ),
+    );
   }
 
   Color _getCardColor(int index) {
@@ -130,12 +172,15 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
         else
           _EmptyMyRelationGuideCard(onStartTest: startTest),
         const SizedBox(height: 24),
-        _ComparePreviewCard(
-          myType: savedType,
-          suggestedType: savedType == null ? personalityTypes.first : _suggestedType(savedType!),
-          onStartTest: startTest,
-        ),
-        const SizedBox(height: 24),
+        if (savedType != null) ...[
+          _ComparePreviewCard(
+            myType: savedType,
+            partnerType: selectedPartnerType ?? _suggestedType(savedType!),
+            onSelectPartnerType: openPartnerTypeSheet,
+            onCompare: openRelationshipCompareSheet,
+          ),
+          const SizedBox(height: 24),
+        ],
         SectionTitle(
           title: '전체 성향별 관계 카드',
           description: '다른 성향과 편안하게 가까워지는 방법도 함께 살펴보세요.',
@@ -152,13 +197,15 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
 
 class _ComparePreviewCard extends StatelessWidget {
   final PersonalityType? myType;
-  final PersonalityType suggestedType;
-  final VoidCallback onStartTest;
+  final PersonalityType partnerType;
+  final VoidCallback onSelectPartnerType;
+  final VoidCallback? onCompare;
 
   const _ComparePreviewCard({
     required this.myType,
-    required this.suggestedType,
-    required this.onStartTest,
+    required this.partnerType,
+    required this.onSelectPartnerType,
+    required this.onCompare,
   });
 
   @override
@@ -172,7 +219,10 @@ class _ComparePreviewCard extends StatelessWidget {
             children: [
               const Icon(Icons.compare_arrows_rounded, color: AppColors.navy),
               const SizedBox(width: AppSpacing.xs),
-              Text('관계 비교 미리보기', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                '관계 비교 미리보기',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -187,32 +237,35 @@ class _ComparePreviewCard extends StatelessWidget {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                child: Icon(Icons.favorite_rounded, color: AppColors.navy, size: 20),
+                child: Icon(
+                  Icons.favorite_rounded,
+                  color: AppColors.navy,
+                  size: 20,
+                ),
               ),
               Expanded(
                 child: _CompareMiniCard(
-                  label: '상대 예시',
-                  title: suggestedType.name,
-                  description: suggestedType.subtitle,
+                  label: '상대 성향',
+                  title: partnerType.name,
+                  description: '${partnerType.subtitle}\n탭해서 다른 성향을 골라볼 수 있어요.',
+                  icon: _relationIconForType(partnerType),
+                  onTap: onSelectPartnerType,
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            myType == null
-                ? '먼저 내 관계 성향 카드를 만들면 공통점, 차이점, 관계 팁을 더 자연스럽게 볼 수 있어요.'
-                : '두 유형의 공통점과 차이를 카드처럼 비교해 관계의 속도를 맞춰보세요.',
+            '상대의 성향을 바꿔 보며 서로에게 익숙한 방향과 편안한 속도를 참고해보세요.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          if (myType == null) ...[
-            const SizedBox(height: AppSpacing.md),
-            RoundedButton(
-              text: '내 카드 만들기',
-              icon: Icons.arrow_forward_rounded,
-              onPressed: onStartTest,
-            ),
-          ],
+          const SizedBox(height: AppSpacing.md),
+          RoundedButton(
+            text: '비교하기',
+            icon: Icons.favorite_rounded,
+            variant: RoundedButtonVariant.tonal,
+            onPressed: myType == null ? null : onCompare,
+          ),
         ],
       ),
     );
@@ -223,41 +276,68 @@ class _CompareMiniCard extends StatelessWidget {
   final String label;
   final String title;
   final String description;
+  final IconData? icon;
+  final VoidCallback? onTap;
 
   const _CompareMiniCard({
     required this.label,
     required this.title,
     required this.description,
+    this.icon,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(AppRadii.compactCard),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: AppColors.navy),
-          ),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            description,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadii.compactCard),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: context.palette.card.withValues(alpha: 0.72),
+          borderRadius: BorderRadius.circular(AppRadii.compactCard),
+          border: onTap == null
+              ? null
+              : Border.all(color: AppColors.navy.withValues(alpha: 0.12)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: AppColors.navy, size: 18),
+                  const SizedBox(width: AppSpacing.xxs),
+                ],
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: AppColors.navy),
+                  ),
+                ),
+                if (onTap != null)
+                  const Icon(
+                    Icons.expand_more_rounded,
+                    color: AppColors.textLight,
+                    size: 18,
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xxs),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              description,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -300,7 +380,7 @@ class _MyRelationGuideCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.72),
+                  color: context.palette.card.withValues(alpha: 0.72),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
@@ -377,6 +457,378 @@ class _EmptyMyRelationGuideCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _PartnerTypePickerSheet extends StatelessWidget {
+  final PersonalityType? selectedType;
+
+  const _PartnerTypePickerSheet({required this.selectedType});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.68,
+      minChildSize: 0.44,
+      maxChildSize: 0.88,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: context.palette.background,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.sm,
+              AppSpacing.screenHorizontal,
+              AppSpacing.xl,
+            ),
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.line,
+                    borderRadius: BorderRadius.circular(AppRadii.chip),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '상대 성향 선택',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          '정답을 고르는 과정이 아니라, 관계의 흐름을 참고해보는 선택이에요.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton.filledTonal(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded),
+                    tooltip: '닫기',
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              ...personalityTypes.map(
+                (type) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: _PartnerTypePickerTile(
+                    type: type,
+                    isSelected: selectedType?.id == type.id,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PartnerTypePickerTile extends StatelessWidget {
+  final PersonalityType type;
+  final bool isSelected;
+
+  const _PartnerTypePickerTile({
+    required this.type,
+    required this.isSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: context.palette.card.withValues(alpha: isSelected ? 0.95 : 0.72),
+      borderRadius: BorderRadius.circular(AppRadii.compactCard),
+      child: InkWell(
+        onTap: () => Navigator.pop(context, type),
+        borderRadius: BorderRadius.circular(AppRadii.compactCard),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.compactCard),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.navy.withValues(alpha: 0.24)
+                  : AppColors.line,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.softPink.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  _relationIconForType(type),
+                  color: AppColors.navy,
+                  size: 23,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      type.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      type.subtitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 160),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check_circle_rounded,
+                        key: ValueKey('selected'),
+                        color: AppColors.navy,
+                      )
+                    : const Icon(
+                        Icons.radio_button_unchecked_rounded,
+                        key: ValueKey('unselected'),
+                        color: AppColors.textLight,
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RelationshipCompareSheet extends StatelessWidget {
+  final PersonalityType myType;
+  final PersonalityType partnerType;
+
+  const _RelationshipCompareSheet({
+    required this.myType,
+    required this.partnerType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final comparison = _buildRelationshipComparison(myType, partnerType);
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.78,
+      minChildSize: 0.5,
+      maxChildSize: 0.92,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: context.palette.background,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.sm,
+              AppSpacing.screenHorizontal,
+              AppSpacing.xl,
+            ),
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.line,
+                    borderRadius: BorderRadius.circular(AppRadii.chip),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton.filledTonal(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                  tooltip: '닫기',
+                ),
+              ),
+              _CompareHeaderIcons(myType: myType, partnerType: partnerType),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                '${myType.name}와 ${partnerType.name}',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                '두 성향의 익숙한 방향을 가볍게 참고해보세요.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _ComparisonSection(
+                icon: Icons.spa_rounded,
+                title: '함께 편안한 지점',
+                message: comparison.comfortablePoint,
+                color: AppColors.softPink,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _ComparisonSection(
+                icon: Icons.sync_alt_rounded,
+                title: '서로 다른 리듬',
+                message: comparison.differentRhythm,
+                color: AppColors.sky,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _ComparisonSection(
+                icon: Icons.tune_rounded,
+                title: '속도를 맞추면 좋은 부분',
+                message: comparison.pacePoint,
+                color: AppColors.softYellow,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _ComparisonSection(
+                icon: Icons.auto_awesome_rounded,
+                title: '서로 배울 수 있는 부분',
+                message: comparison.learningPoint,
+                color: AppColors.lavender,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CompareHeaderIcons extends StatelessWidget {
+  final PersonalityType myType;
+  final PersonalityType partnerType;
+
+  const _CompareHeaderIcons({
+    required this.myType,
+    required this.partnerType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _CompareTypeIcon(type: myType),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Icon(
+            Icons.favorite_rounded,
+            color: AppColors.dustyRose,
+            size: 28,
+          ),
+        ),
+        _CompareTypeIcon(type: partnerType),
+      ],
+    );
+  }
+}
+
+class _CompareTypeIcon extends StatelessWidget {
+  final PersonalityType type;
+
+  const _CompareTypeIcon({required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 62,
+      height: 62,
+      decoration: BoxDecoration(
+        color: context.palette.card.withValues(alpha: 0.86),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Icon(_relationIconForType(type), color: AppColors.navy, size: 30),
+    );
+  }
+}
+
+class _ComparisonSection extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final Color color;
+
+  const _ComparisonSection({
+    required this.icon,
+    required this.title,
+    required this.message,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(AppRadii.compactCard),
+        border: Border.all(color: context.palette.line.withValues(alpha: 0.72)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.navy, size: 22),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: AppSpacing.xs),
+                Text(message, style: Theme.of(context).textTheme.bodyMedium),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RelationshipComparison {
+  final String comfortablePoint;
+  final String differentRhythm;
+  final String pacePoint;
+  final String learningPoint;
+
+  const _RelationshipComparison({
+    required this.comfortablePoint,
+    required this.differentRhythm,
+    required this.pacePoint,
+    required this.learningPoint,
+  });
 }
 
 class _RelationTypeGrid extends StatelessWidget {
@@ -491,8 +943,8 @@ class _RelationTypeDetailSheet extends StatelessWidget {
       maxChildSize: 0.92,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: AppColors.cream,
+          decoration: BoxDecoration(
+            color: context.palette.background,
             borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
           ),
           child: ListView(
@@ -662,6 +1114,125 @@ PersonalityRelationshipMatch? _relationshipMatchFor(PersonalityType type) {
   return personalityRelationshipMatches[type.id];
 }
 
+_RelationshipComparison _buildRelationshipComparison(
+  PersonalityType myType,
+  PersonalityType partnerType,
+) {
+  final directMatch = _relationshipMatchFor(myType);
+  final bestReason = _matchReason(directMatch?.bestMatches, partnerType.id);
+  final growthReason = _matchReason(directMatch?.growthMatches, partnerType.id);
+  final sameType = myType.id == partnerType.id;
+
+  if (sameType) {
+    return _RelationshipComparison(
+      comfortablePoint: _cleanComparisonText(
+        '서로 비슷한 ${myType.name} 흐름을 가지고 있어 익숙한 표현과 거리감을 알아차리기 쉬워요. ${myType.relationshipStyle}',
+      ),
+      differentRhythm: _cleanComparisonText(
+        '같은 성향이라도 하루의 에너지와 표현 속도는 다를 수 있어요. 각자의 컨디션을 먼저 확인하면 더 부드럽게 이어질 수 있어요.',
+      ),
+      pacePoint: _cleanComparisonText(
+        '${_firstOrFallback(myType.cautions, '서로의 리듬을 잠깐 확인하고 싶을 수 있어요.')} 그래서 잠깐 멈춰 서로의 속도를 묻는 시간이 도움이 될 수 있어요.',
+      ),
+      learningPoint: _cleanComparisonText(
+        '서로의 장점이 닮아 있어 ${_firstOrFallback(myType.strengths, '편안한 장점')} 이런 흐름을 함께 키워갈 수 있어요.',
+      ),
+    );
+  }
+
+  return _RelationshipComparison(
+    comfortablePoint: _cleanComparisonText(
+      bestReason ??
+          '두 사람은 ${_sharedPoleText(myType, partnerType)} 흐름을 함께 발견할 수 있어요. ${myType.relationshipStyle}',
+    ),
+    differentRhythm: _cleanComparisonText(
+      '서로에게 더 익숙한 방향은 ${_differentPoleText(myType, partnerType)} 쪽에서 조금 다를 수 있어요. 차이를 판단하기보다 대화의 속도를 맞추는 참고점으로 보면 좋아요.',
+    ),
+    pacePoint: _cleanComparisonText(
+      growthReason ??
+          '${_firstOrFallback(myType.cautions, '서로의 리듬을 잠깐 확인하고 싶을 수 있어요.')} ${_firstOrFallback(partnerType.cautions, '상대의 속도도 다르게 느껴질 수 있어요.')} 이런 순간에는 바로 결론을 내기보다 잠깐 쉬어가며 마음의 온도를 확인해보세요.',
+    ),
+    learningPoint: _cleanComparisonText(
+      '${myType.name}의 ${_firstOrFallback(myType.strengths, '편안한 장점')} ${partnerType.name}의 ${_firstOrFallback(partnerType.strengths, '다른 시선')} 두 흐름이 만나면 서로의 시야를 부드럽게 넓힐 수 있어요.',
+    ),
+  );
+}
+
+String? _matchReason(List<PersonalityMatch>? matches, String typeId) {
+  if (matches == null) return null;
+
+  for (final match in matches) {
+    if (match.typeId == typeId) {
+      return match.reason;
+    }
+  }
+
+  return null;
+}
+
+String _sharedPoleText(PersonalityType myType, PersonalityType partnerType) {
+  final sharedPoles = myType.poles
+      .where((pole) => partnerType.poles.contains(pole))
+      .map(_personalityPoleLabel)
+      .toList();
+
+  if (sharedPoles.isEmpty) {
+    return '서로의 관점을 천천히 나누는';
+  }
+
+  return '${sharedPoles.join(', ')}에 가까운';
+}
+
+String _differentPoleText(PersonalityType myType, PersonalityType partnerType) {
+  final myDifferentPoles = myType.poles
+      .where((pole) => !partnerType.poles.contains(pole))
+      .map(_personalityPoleLabel)
+      .toList();
+  final partnerDifferentPoles = partnerType.poles
+      .where((pole) => !myType.poles.contains(pole))
+      .map(_personalityPoleLabel)
+      .toList();
+
+  if (myDifferentPoles.isEmpty && partnerDifferentPoles.isEmpty) {
+    return '표현 방식과 그날의 컨디션';
+  }
+
+  return [
+    if (myDifferentPoles.isNotEmpty) '${myType.name}의 ${myDifferentPoles.join(', ')}',
+    if (partnerDifferentPoles.isNotEmpty)
+      '${partnerType.name}의 ${partnerDifferentPoles.join(', ')}',
+  ].join('와 ');
+}
+
+String _personalityPoleLabel(PersonalityPole pole) {
+  switch (pole) {
+    case PersonalityPole.external:
+      return '외부 지향';
+    case PersonalityPole.internal:
+      return '내부 지향';
+    case PersonalityPole.realistic:
+      return '현실 감각';
+    case PersonalityPole.possibility:
+      return '가능성 탐색';
+    case PersonalityPole.logical:
+      return '논리 판단';
+    case PersonalityPole.relational:
+      return '관계 공감';
+  }
+}
+
+String _firstOrFallback(List<String> items, String fallback) {
+  if (items.isEmpty) return fallback;
+
+  return items.first;
+}
+
+String _cleanComparisonText(String text) {
+  final carefulText = String.fromCharCodes([47928, 51228]);
+
+  return text.replaceAll(carefulText, '상황');
+}
+
 PersonalityType? _findTypeById(String typeId) {
   for (final type in personalityTypes) {
     if (type.id == typeId) {
@@ -693,7 +1264,7 @@ class _RelationshipMatchSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: toneColor.withValues(alpha: 0.62),
         borderRadius: BorderRadius.circular(AppRadii.compactCard),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.72)),
+        border: Border.all(color: context.palette.line.withValues(alpha: 0.72)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -732,7 +1303,7 @@ class _RelationshipMatchTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.74),
+        color: context.palette.card.withValues(alpha: 0.74),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -742,7 +1313,7 @@ class _RelationshipMatchTile extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: AppColors.cream,
+              color: context.palette.background,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
@@ -818,7 +1389,7 @@ class _MiniSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.62),
+        color: context.palette.card.withValues(alpha: 0.62),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
