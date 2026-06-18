@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
 import '../data/personality_data.dart';
+import '../data/personality_match_data.dart';
+import '../models/personality_match.dart';
 import '../models/personality_test_result.dart';
 import '../models/personality_type.dart';
 import '../services/local_storage_service.dart';
@@ -544,6 +546,22 @@ class _RelationTypeDetailSheet extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: AppSpacing.lg),
+              if (_relationshipMatchFor(type) case final match?) ...[
+                _RelationshipMatchSection(
+                  title: '잘 맞는 성향',
+                  icon: Icons.favorite_rounded,
+                  matches: match.bestMatches,
+                  toneColor: AppColors.softPink,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _RelationshipMatchSection(
+                  title: '노력하면 좋은 성향',
+                  icon: Icons.handshake_rounded,
+                  matches: match.growthMatches,
+                  toneColor: AppColors.lavender,
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
               _MiniSection(
                 icon: Icons.favorite_rounded,
                 title: '이런 사람과 잘 맞아요',
@@ -610,6 +628,149 @@ class _PersonalityTypeImageFallback extends StatelessWidget {
       color: AppColors.white.withValues(alpha: 0.62),
       child: Center(
         child: Icon(_iconForType(type), color: AppColors.navy, size: 38),
+      ),
+    );
+  }
+}
+
+String _personalityCardImagePath(PersonalityType type) {
+  return 'images/personality_cards/${type.id}.png';
+}
+
+IconData _iconForType(PersonalityType type) {
+  switch (type.icon) {
+    case IconDataCode.compass:
+      return Icons.explore_rounded;
+    case IconDataCode.heart:
+      return Icons.favorite_rounded;
+    case IconDataCode.spark:
+      return Icons.auto_awesome_rounded;
+    case IconDataCode.rainbow:
+      return Icons.wb_sunny_rounded;
+    case IconDataCode.anchor:
+      return Icons.anchor_rounded;
+    case IconDataCode.nest:
+      return Icons.spa_rounded;
+    case IconDataCode.moon:
+      return Icons.nightlight_round;
+    case IconDataCode.lantern:
+      return Icons.emoji_objects_rounded;
+  }
+}
+
+PersonalityRelationshipMatch? _relationshipMatchFor(PersonalityType type) {
+  return personalityRelationshipMatches[type.id];
+}
+
+PersonalityType? _findTypeById(String typeId) {
+  for (final type in personalityTypes) {
+    if (type.id == typeId) {
+      return type;
+    }
+  }
+
+  return null;
+}
+
+class _RelationshipMatchSection extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final List<PersonalityMatch> matches;
+  final Color toneColor;
+
+  const _RelationshipMatchSection({
+    required this.title,
+    required this.icon,
+    required this.matches,
+    required this.toneColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: toneColor.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(AppRadii.compactCard),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.72)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 21, color: AppColors.textDark),
+              const SizedBox(width: AppSpacing.xs),
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ...matches.map(
+            (match) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: _RelationshipMatchTile(match: match),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RelationshipMatchTile extends StatelessWidget {
+  final PersonalityMatch match;
+
+  const _RelationshipMatchTile({required this.match});
+
+  @override
+  Widget build(BuildContext context) {
+    final matchedType = _findTypeById(match.typeId);
+    final matchedTypeName = matchedType?.name ?? '알 수 없는 성향';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.74),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: AppColors.cream,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              matchedType == null
+                  ? Icons.favorite_border_rounded
+                  : _iconForType(matchedType),
+              color: AppColors.navy,
+              size: 21,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  matchedTypeName,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  match.reason,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
