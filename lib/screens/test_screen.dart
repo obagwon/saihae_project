@@ -93,8 +93,8 @@ class _TestScreenState extends State<TestScreen> {
             LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.softBeige,
-              color: AppColors.textDark,
-              minHeight: 8,
+              color: AppColors.navy,
+              minHeight: 10,
               borderRadius: BorderRadius.circular(20),
             ),
             const SizedBox(height: 18),
@@ -106,13 +106,13 @@ class _TestScreenState extends State<TestScreen> {
             const SizedBox(height: 18),
 
             SoftCard(
-              backgroundColor: AppColors.softPink,
+              backgroundColor: AppColors.blush,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(
-                    Icons.favorite_rounded,
-                    color: AppColors.textDark,
+                    Icons.forum_rounded,
+                    color: AppColors.navy,
                     size: 38,
                   ),
                   const SizedBox(height: 18),
@@ -122,7 +122,7 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '정답은 없어요. 오늘의 나와 가장 가까운 쪽을 골라주세요.',
+                    '정답은 없어요. 관계 속 평소의 나와 가장 가까운 쪽을 골라주세요.',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -207,7 +207,7 @@ class _AnswerButton extends StatelessWidget {
       text: text,
       onPressed: onTap,
       icon: isSelected ? Icons.check_circle_rounded : null,
-      backgroundColor: isSelected ? AppColors.textDark : AppColors.white,
+      backgroundColor: isSelected ? AppColors.navy : AppColors.white,
       foregroundColor: isSelected ? AppColors.white : AppColors.textDark,
     );
   }

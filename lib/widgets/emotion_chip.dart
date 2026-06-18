@@ -19,7 +19,7 @@ class EmotionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = isSelected
-        ? AppColors.textDark
+        ? AppColors.navy
         : AppColors.softPink.withValues(alpha: 0.65);
 
     final textColor = isSelected ? AppColors.white : AppColors.textBrown;
@@ -38,7 +38,7 @@ class EmotionChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected
-                ? AppColors.textDark
+                ? AppColors.navy
                 : AppColors.softPink.withValues(alpha: 0.4),
           ),
         ),

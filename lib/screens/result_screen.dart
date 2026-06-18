@@ -85,7 +85,7 @@ class _ResultScreenState extends State<ResultScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '지금의 나와 가까운\n사이해 유형이에요',
+                '지금의 나를 비추는\n관계 분석 카드예요',
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
@@ -114,7 +114,7 @@ class _ResultScreenState extends State<ResultScreen> {
               ),
 
               SoftCard(
-                backgroundColor: AppColors.softYellow,
+                backgroundColor: AppColors.sky,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: resultType.relationTips.map((tip) {
@@ -126,7 +126,7 @@ class _ResultScreenState extends State<ResultScreen> {
                           const Icon(
                             Icons.favorite_rounded,
                             size: 20,
-                            color: AppColors.textDark,
+                            color: AppColors.navy,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -150,7 +150,7 @@ class _ResultScreenState extends State<ResultScreen> {
               ),
 
               SoftCard(
-                backgroundColor: AppColors.softBeige,
+                backgroundColor: AppColors.lavender,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: resultType.avoidTips.map((tip) {
@@ -162,7 +162,7 @@ class _ResultScreenState extends State<ResultScreen> {
                           const Icon(
                             Icons.spa_rounded,
                             size: 20,
-                            color: AppColors.textDark,
+                            color: AppColors.navy,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -235,8 +235,18 @@ class _AxisRatioCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('성향 축 비율', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(
+                Icons.tune_rounded,
+                color: AppColors.navy,
+                size: 22,
+              ),
+              const SizedBox(width: 8),
+              Text('성향 축 비율', style: Theme.of(context).textTheme.titleMedium),
+            ],
+          ),
+          const SizedBox(height: 14),
           _AxisRatioRow(leftLabel: '외부 지향', rightLabel: '내부 지향', left: percentages['external'] ?? 50, right: percentages['internal'] ?? 50),
           _AxisRatioRow(leftLabel: '현실 감각', rightLabel: '가능성 탐색', left: percentages['realistic'] ?? 50, right: percentages['possibility'] ?? 50),
           _AxisRatioRow(leftLabel: '논리 판단', rightLabel: '관계 공감', left: percentages['logical'] ?? 50, right: percentages['relational'] ?? 50),
@@ -265,7 +275,7 @@ class _AxisRatioRow extends StatelessWidget {
           const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: LinearProgressIndicator(value: left / 100, minHeight: 8, backgroundColor: AppColors.softBeige, color: AppColors.textDark),
+            child: LinearProgressIndicator(value: left / 100, minHeight: 8, backgroundColor: AppColors.softBeige, color: AppColors.navy),
           ),
         ],
       ),

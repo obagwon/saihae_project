@@ -60,49 +60,154 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const _ConnectionHero(),
+              const SizedBox(height: 26),
               Text(
-                '사이해에 오신 걸\n환영해요',
+                '사람과 사람 사이,\n조금 더 다정하게 이해해요',
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
               Text(
-                '사이해는 마음을 판단하기보다, 오늘의 나를 조금 더 부드럽게 이해하도록 돕는 기록 앱이에요.',
+                '사이해는 감정과 성향, 관계의 차이와 공통점을 부드럽게 살펴보는 관계 이해 가이드예요.',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 24),
               const _OnboardingInfoCard(
                 icon: Icons.favorite_rounded,
                 title: '사이를 이해하고 나를 이해하기',
-                description: '사이해는 감정, 성향, 관계 스타일을 가볍게 돌아보는 자기이해 가이드예요.',
-                color: AppColors.softPink,
+                description: '성향과 관계 스타일을 카드처럼 읽기 쉽게 정리해줘요.',
+                color: AppColors.blush,
               ),
               const SizedBox(height: 14),
               const _OnboardingInfoCard(
                 icon: Icons.edit_note_rounded,
                 title: '오늘의 마음을 짧게 기록하기',
-                description: '감정과 강도, 한 줄 메모를 남기면 작은 통계와 행동 추천을 볼 수 있어요.',
-                color: AppColors.softYellow,
+                description: '감정과 강도, 한 줄 메모를 남기며 나의 흐름을 돌아볼 수 있어요.',
+                color: AppColors.sky,
               ),
               const SizedBox(height: 14),
               const _OnboardingInfoCard(
                 icon: Icons.info_outline_rounded,
-                title: '전문 심리 진단이 아니에요',
-                description: '사이해의 테스트와 추천은 상담, 진단, 치료 목적이 아닌 일상 속 자기이해 참고용이에요. 힘든 감정이 오래 이어지면 주변 사람이나 전문 기관의 도움을 고려해 주세요.',
-                color: AppColors.softBeige,
+                title: '가볍지만 신중한 자기이해',
+                description: '상담, 진단, 치료 목적이 아닌 일상 속 참고용이에요. 힘든 감정이 오래 이어지면 주변 사람이나 전문 기관의 도움을 고려해 주세요.',
+                color: AppColors.lavender,
               ),
               const SizedBox(height: 24),
               RoundedButton(
-                text: isSaving ? '시작 준비 중...' : '시작하기',
+                text: isSaving ? '시작 준비 중...' : '사이해 시작하기',
                 icon: Icons.arrow_forward_rounded,
                 onPressed: isSaving ? null : completeOnboarding,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ConnectionHero extends StatelessWidget {
+  const _ConnectionHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return SoftCard(
+      backgroundColor: AppColors.warmIvory,
+      padding: const EdgeInsets.all(24),
+      child: SizedBox(
+        height: 210,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 18,
+              top: 42,
+              child: _BubbleNode(
+                size: 96,
+                color: AppColors.softPink,
+                icon: Icons.chat_bubble_rounded,
+              ),
+            ),
+            Positioned(
+              right: 14,
+              bottom: 34,
+              child: _BubbleNode(
+                size: 104,
+                color: AppColors.sky,
+                icon: Icons.favorite_rounded,
+              ),
+            ),
+            Positioned(
+              left: 108,
+              top: 94,
+              right: 100,
+              child: Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.softPink, AppColors.lavender, AppColors.sky],
+                  ),
+                ),
+              ),
+            ),
+            const Positioned(left: 26, top: 14, child: _LightDot(size: 10)),
+            const Positioned(right: 42, top: 24, child: _LightDot(size: 7)),
+            const Positioned(left: 132, bottom: 20, child: _LightDot(size: 8)),
+            Positioned(
+              left: 0,
+              bottom: 0,
+              child: Text(
+                'SAIHAE',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.textLight,
+                      letterSpacing: 3,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BubbleNode extends StatelessWidget {
+  final double size;
+  final Color color;
+  final IconData icon;
+
+  const _BubbleNode({required this.size, required this.color, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(size * 0.36),
+      ),
+      child: Icon(icon, color: AppColors.navy, size: size * 0.36),
+    );
+  }
+}
+
+class _LightDot extends StatelessWidget {
+  final double size;
+  const _LightDot({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        color: AppColors.softYellow,
+        shape: BoxShape.circle,
       ),
     );
   }
@@ -132,28 +237,19 @@ class _OnboardingInfoCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.72),
+              color: AppColors.white.withValues(alpha: 0.76),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.textDark,
-            ),
+            child: Icon(icon, color: AppColors.navy),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text(description, style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
           ),

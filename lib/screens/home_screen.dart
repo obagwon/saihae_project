@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 24),
 
           SoftCard(
-            backgroundColor: AppColors.softPink,
+            backgroundColor: AppColors.blush,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           SoftCard(
-            backgroundColor: AppColors.softYellow,
+            backgroundColor: AppColors.sky,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const Icon(
                         Icons.check_circle_rounded,
-                        color: AppColors.textDark,
+                        color: AppColors.navy,
                         size: 22,
                       ),
                       const SizedBox(width: 10),
@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           SoftCard(
-            backgroundColor: AppColors.softPeach,
+            backgroundColor: AppColors.lavender,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -286,7 +286,7 @@ class _IconBadge extends StatelessWidget {
       ),
       child: Icon(
         icon,
-        color: AppColors.textDark,
+        color: AppColors.navy,
       ),
     );
   }
