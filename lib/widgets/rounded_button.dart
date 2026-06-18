@@ -21,7 +21,7 @@ class RoundedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = ElevatedButton.styleFrom(
-      backgroundColor: backgroundColor ?? AppColors.textDark,
+      backgroundColor: backgroundColor ?? AppColors.navy,
       foregroundColor: foregroundColor ?? AppColors.white,
       elevation: 0,
       padding: const EdgeInsets.symmetric(

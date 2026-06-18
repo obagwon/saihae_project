@@ -185,14 +185,14 @@ class _SavedAnalysisContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SoftCard(
-          backgroundColor: AppColors.softYellow.withValues(alpha: 0.75),
+          backgroundColor: AppColors.sky.withValues(alpha: 0.75),
           hasShadow: false,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Icon(
                 Icons.check_circle_rounded,
-                color: AppColors.textDark,
+                color: AppColors.navy,
                 size: 22,
               ),
               const SizedBox(width: 10),
@@ -242,7 +242,7 @@ class _EmptyAnalysisContent extends StatelessWidget {
               const Icon(
                 Icons.psychology_alt_rounded,
                 size: 42,
-                color: AppColors.textDark,
+                color: AppColors.navy,
               ),
               const SizedBox(height: 16),
               Text(

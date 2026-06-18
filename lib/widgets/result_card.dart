@@ -33,7 +33,7 @@ class ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SoftCard(
-      backgroundColor: AppColors.softPeach,
+      backgroundColor: AppColors.blush,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -43,17 +43,33 @@ class ResultCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.72),
+                  color: AppColors.white.withValues(alpha: 0.78),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: Icon(icon, color: AppColors.textDark),
+                child: Icon(icon, color: AppColors.navy),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('나의 사이해 유형', style: Theme.of(context).textTheme.bodySmall),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '나의 사이해 유형',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.navy,
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(type.name, style: Theme.of(context).textTheme.headlineMedium),
                   ],
@@ -142,8 +158,22 @@ class _ResultInfoBlock extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('• '),
-                    Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyMedium)),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      margin: const EdgeInsets.only(top: 8),
+                      decoration: const BoxDecoration(
+                        color: AppColors.navy,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        item,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
                   ],
                 ),
               )),
@@ -163,8 +193,9 @@ class _InfoContainer extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.white.withValues(alpha: 0.68),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.7)),
       ),
       child: child,
     );
