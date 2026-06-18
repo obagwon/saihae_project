@@ -86,41 +86,57 @@ class _TestScreenState extends State<TestScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        padding: AppSpacing.screenPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'QUESTION ${currentQuestionIndex + 1}',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: AppColors.dustyRose,
+                        letterSpacing: 1.6,
+                      ),
+                ),
+                Text(
+                  '${currentQuestionIndex + 1} / ${questions.length}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
             LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.softBeige,
               color: AppColors.navy,
-              minHeight: 10,
-              borderRadius: BorderRadius.circular(20),
+              minHeight: 8,
+              borderRadius: BorderRadius.circular(AppRadii.chip),
             ),
-            const SizedBox(height: 18),
-
-            Text(
-              '${currentQuestionIndex + 1} / ${questions.length}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.xl),
 
             SoftCard(
-              backgroundColor: AppColors.blush,
+              tone: SoftCardTone.hero,
+              borderRadius: AppRadii.heroCard,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.forum_rounded,
-                    color: AppColors.navy,
-                    size: 38,
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.white.withValues(alpha: 0.78),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: const Icon(Icons.forum_rounded, color: AppColors.navy),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
                     question.text,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     '정답은 없어요. 관계 속 평소의 나와 가장 가까운 쪽을 골라주세요.',
                     style: Theme.of(context).textTheme.bodyMedium,
@@ -129,7 +145,7 @@ class _TestScreenState extends State<TestScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
 
             ...answerOptions.map((option) {
               final isSelected = answers[currentQuestionIndex] == option.score;
@@ -150,10 +166,10 @@ class _TestScreenState extends State<TestScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
 
             SoftCard(
-              backgroundColor: AppColors.white,
+              tone: SoftCardTone.notice,
               hasShadow: false,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,8 +223,7 @@ class _AnswerButton extends StatelessWidget {
       text: text,
       onPressed: onTap,
       icon: isSelected ? Icons.check_circle_rounded : null,
-      backgroundColor: isSelected ? AppColors.navy : AppColors.white,
-      foregroundColor: isSelected ? AppColors.white : AppColors.textDark,
+      variant: isSelected ? RoundedButtonVariant.primary : RoundedButtonVariant.secondary,
     );
   }
 }

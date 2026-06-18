@@ -20,35 +20,28 @@ class EmotionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final backgroundColor = isSelected
         ? AppColors.navy
-        : AppColors.softPink.withValues(alpha: 0.65);
-
+        : AppColors.white.withValues(alpha: 0.72);
     final textColor = isSelected ? AppColors.white : AppColors.textBrown;
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(AppRadii.chip),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 10,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppRadii.chip),
           border: Border.all(
-            color: isSelected
-                ? AppColors.navy
-                : AppColors.softPink.withValues(alpha: 0.4),
+            color: isSelected ? AppColors.navy : AppColors.line,
           ),
         ),
         child: Text(
           '$emoji $label',
-          style: TextStyle(
-            color: textColor,
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          ),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: textColor,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+              ),
         ),
       ),
     );
