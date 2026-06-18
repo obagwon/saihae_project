@@ -33,171 +33,121 @@ class ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SoftCard(
-      backgroundColor: AppColors.blush,
+      tone: SoftCardTone.hero,
+      borderRadius: AppRadii.heroCard,
+      padding: const EdgeInsets.all(26),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: AppColors.white.withValues(alpha: 0.78),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(icon, color: AppColors.navy, size: 28),
+              ),
+              const Spacer(),
+              _Tag(text: 'SAIHAE TYPE CARD'),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(type.name, style: Theme.of(context).textTheme.headlineMedium),
+          const SizedBox(height: AppSpacing.xs),
+          Text(type.subtitle, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.md),
+          Text(type.description, style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: AppSpacing.lg),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: type.traits.take(3).map((trait) => _Tag(text: trait)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ResultDetailSection extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final List<String> items;
+  final SoftCardTone tone;
+
+  const ResultDetailSection({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.items,
+    this.tone = SoftCardTone.surface,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SoftCard(
+      tone: tone,
+      hasShadow: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.78),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Icon(icon, color: AppColors.navy),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.white.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        '나의 사이해 유형',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.navy,
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(type.name, style: Theme.of(context).textTheme.headlineMedium),
-                  ],
-                ),
-              ),
+              Icon(icon, color: AppColors.navy, size: 22),
+              const SizedBox(width: AppSpacing.xs),
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(type.subtitle, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 16),
-          Text(type.description, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 20),
-          _ResultInfoBlock(title: '대표 특징', items: type.traits),
-          const SizedBox(height: 16),
-          _ResultInfoBlock(title: '잘하는 점', items: type.strengths),
-          const SizedBox(height: 16),
-          _ResultInfoBlock(title: '주의하면 좋은 점', items: type.cautions),
-          const SizedBox(height: 16),
-          _SingleInfoBlock(title: '편안함을 느끼는 상황', text: type.comfortZone),
-          const SizedBox(height: 16),
-          _SingleInfoBlock(title: '관계에서의 모습', text: type.relationshipStyle),
-          const SizedBox(height: 16),
-          _ResultInfoBlock(title: '추천 활동', items: type.recommendedActivities),
-          const SizedBox(height: 20),
-          _DailyAction(text: type.dailyAction),
-        ],
-      ),
-    );
-  }
-}
-
-class _SingleInfoBlock extends StatelessWidget {
-  final String title;
-  final String text;
-  const _SingleInfoBlock({required this.title, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return _InfoContainer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Text(text, style: Theme.of(context).textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _DailyAction extends StatelessWidget {
-  final String text;
-  const _DailyAction({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return _InfoContainer(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.auto_awesome_rounded, color: AppColors.textDark, size: 22),
-          const SizedBox(width: 10),
-          Expanded(child: Text('오늘의 작은 제안: $text', style: Theme.of(context).textTheme.bodyMedium)),
-        ],
-      ),
-    );
-  }
-}
-
-class _ResultInfoBlock extends StatelessWidget {
-  final String title;
-  final List<String> items;
-  const _ResultInfoBlock({required this.title, required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    return _InfoContainer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          ...items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      margin: const EdgeInsets.only(top: 8),
-                      decoration: const BoxDecoration(
-                        color: AppColors.navy,
-                        shape: BoxShape.circle,
-                      ),
+          const SizedBox(height: AppSpacing.md),
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    margin: const EdgeInsets.only(top: 8),
+                    decoration: const BoxDecoration(
+                      color: AppColors.navy,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        item,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyMedium)),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _InfoContainer extends StatelessWidget {
-  final Widget child;
-  const _InfoContainer({required this.child});
+class _Tag extends StatelessWidget {
+  final String text;
+
+  const _Tag({required this.text});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.68),
-        borderRadius: BorderRadius.circular(22),
+        color: AppColors.white.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(AppRadii.chip),
         border: Border.all(color: AppColors.white.withValues(alpha: 0.7)),
       ),
-      child: child,
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.navy),
+      ),
     );
   }
 }

@@ -30,6 +30,18 @@ class _MainTabScreenState extends State<MainTabScreen> {
     });
   }
 
+  void _openAnalysisTab() {
+    setState(() {
+      _selectedIndex = 1;
+    });
+  }
+
+  void _openRelationTab() {
+    setState(() {
+      _selectedIndex = 2;
+    });
+  }
+
   void _clearInitialRecordEmotion() {
     if (_initialRecordEmotionId == null) return;
 
@@ -62,7 +74,11 @@ class _MainTabScreenState extends State<MainTabScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          HomeScreen(onStartRecord: _startRecordFromHome),
+          HomeScreen(
+            onStartRecord: _startRecordFromHome,
+            onOpenAnalysis: _openAnalysisTab,
+            onOpenRelationGuide: _openRelationTab,
+          ),
           const AnalysisScreen(),
           const RelationGuideScreen(),
           RecordScreen(

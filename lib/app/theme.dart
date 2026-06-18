@@ -13,6 +13,7 @@ class AppColors {
   static const Color mint = Color(0xFFE4F6EE);
 
   static const Color navy = Color(0xFF26364A);
+  static const Color dustyRose = Color(0xFFC8798D);
   static const Color textDark = Color(0xFF2F3747);
   static const Color textBrown = Color(0xFF6B5D57);
   static const Color textLight = Color(0xFF968B88);
@@ -22,10 +23,44 @@ class AppColors {
 }
 
 class AppSpacing {
+  static const double xxs = 4;
+  static const double xs = 8;
+  static const double sm = 12;
+  static const double md = 16;
+  static const double lg = 20;
+  static const double xl = 24;
+  static const double xxl = 32;
+
   static const double screenHorizontal = 20;
   static const double cardRadius = 28;
+  static const double heroRadius = 32;
   static const double buttonRadius = 18;
   static const double cardPadding = 22;
+
+  static const EdgeInsets screenPadding = EdgeInsets.fromLTRB(
+    screenHorizontal,
+    xs,
+    screenHorizontal,
+    xl,
+  );
+}
+
+class AppRadii {
+  static const double chip = 999;
+  static const double button = 18;
+  static const double compactCard = 22;
+  static const double card = 28;
+  static const double heroCard = 32;
+}
+
+class AppShadows {
+  static List<BoxShadow> soft = [
+    BoxShadow(
+      color: AppColors.navy.withValues(alpha: 0.07),
+      blurRadius: 24,
+      offset: const Offset(0, 12),
+    ),
+  ];
 }
 
 class AppTheme {
@@ -37,9 +72,8 @@ class AppTheme {
       seedColor: AppColors.softPink,
       brightness: Brightness.light,
       primary: AppColors.navy,
-      secondary: AppColors.lavender,
+      secondary: AppColors.dustyRose,
       surface: AppColors.white,
-      background: AppColors.cream,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.cream,
@@ -52,23 +86,15 @@ class AppTheme {
         fontWeight: FontWeight.w800,
         letterSpacing: -0.2,
       ),
-      iconTheme: IconThemeData(
-        color: AppColors.textDark,
-      ),
+      iconTheme: IconThemeData(color: AppColors.textDark),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: AppColors.navy,
       unselectedItemColor: AppColors.textLight,
       type: BottomNavigationBarType.fixed,
-      selectedLabelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-      ),
-      unselectedLabelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
+      selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+      unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
     ),
     textTheme: const TextTheme(
       headlineLarge: TextStyle(
@@ -118,23 +144,22 @@ class AppTheme {
         fontSize: 14,
         fontWeight: FontWeight.w800,
       ),
+      labelMedium: TextStyle(
+        color: AppColors.textDark,
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 15,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
         ),
-        textStyle: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w800,
-        ),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
       ),
     ),
     cardTheme: CardThemeData(
@@ -143,6 +168,23 @@ class AppTheme {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.white,
+      contentPadding: const EdgeInsets.all(AppSpacing.md),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(22),
+        borderSide: const BorderSide(color: AppColors.line),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(22),
+        borderSide: const BorderSide(color: AppColors.line),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(22),
+        borderSide: const BorderSide(color: AppColors.navy, width: 1.4),
       ),
     ),
   );

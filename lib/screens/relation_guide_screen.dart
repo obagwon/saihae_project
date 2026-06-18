@@ -83,6 +83,11 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
     await loadSavedResult();
   }
 
+  PersonalityType _suggestedType(PersonalityType type) {
+    final index = personalityTypes.indexWhere((item) => item.id == type.id);
+    return personalityTypes[(index + 1) % personalityTypes.length];
+  }
+
   Color _getCardColor(int index) {
     final colors = [
       AppColors.softYellow,
@@ -104,7 +109,7 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
     });
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: AppSpacing.screenPadding,
       children: [
         Text(
           '사람마다 가까워지는\n속도는 달라요',
@@ -123,8 +128,14 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
         else
           _EmptyMyRelationGuideCard(onStartTest: startTest),
         const SizedBox(height: 24),
+        _ComparePreviewCard(
+          myType: savedType,
+          suggestedType: savedType == null ? personalityTypes.first : _suggestedType(savedType!),
+          onStartTest: startTest,
+        ),
+        const SizedBox(height: 24),
         SectionTitle(
-          title: '전체 성향별 관계 가이드',
+          title: '전체 성향별 관계 카드',
           description: '다른 성향과 편안하게 가까워지는 방법도 함께 살펴보세요.',
         ),
         ...List.generate(personalityTypes.length, (index) {
@@ -141,6 +152,109 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
           );
         }),
       ],
+    );
+  }
+}
+
+
+class _ComparePreviewCard extends StatelessWidget {
+  final PersonalityType? myType;
+  final PersonalityType suggestedType;
+  final VoidCallback onStartTest;
+
+  const _ComparePreviewCard({
+    required this.myType,
+    required this.suggestedType,
+    required this.onStartTest,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SoftCard(
+      tone: SoftCardTone.sky,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.compare_arrows_rounded, color: AppColors.navy),
+              const SizedBox(width: AppSpacing.xs),
+              Text('관계 비교 미리보기', style: Theme.of(context).textTheme.titleLarge),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _CompareMiniCard(
+                  label: '나',
+                  title: myType?.name ?? '아직 비어 있어요',
+                  description: myType?.subtitle ?? '테스트 후 내 카드를 자동으로 불러와요.',
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                child: Icon(Icons.favorite_rounded, color: AppColors.navy, size: 20),
+              ),
+              Expanded(
+                child: _CompareMiniCard(
+                  label: '상대 예시',
+                  title: suggestedType.name,
+                  description: suggestedType.subtitle,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            myType == null
+                ? '먼저 내 관계 성향 카드를 만들면 공통점, 차이점, 관계 팁을 더 자연스럽게 볼 수 있어요.'
+                : '두 유형의 공통점과 차이를 카드처럼 비교해 관계의 속도를 맞춰보세요.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          if (myType == null) ...[
+            const SizedBox(height: AppSpacing.md),
+            RoundedButton(
+              text: '내 카드 만들기',
+              icon: Icons.arrow_forward_rounded,
+              onPressed: onStartTest,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CompareMiniCard extends StatelessWidget {
+  final String label;
+  final String title;
+  final String description;
+
+  const _CompareMiniCard({
+    required this.label,
+    required this.title,
+    required this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(AppRadii.compactCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.navy)),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(description, maxLines: 3, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ),
     );
   }
 }

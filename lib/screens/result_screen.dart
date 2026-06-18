@@ -80,17 +80,17 @@ class _ResultScreenState extends State<ResultScreen> {
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          padding: AppSpacing.screenPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '지금의 나를 비추는\n관계 분석 카드예요',
+                '나의 관계 성향 카드가\n완성됐어요',
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
               Text(
-                '결과는 고정된 성격이 아니라, 현재 나를 이해하기 위한 참고용 가이드로 봐주세요.',
+                '${resultType.name}의 핵심 요약을 먼저 보고, 아래에서 관계 팁을 자세히 살펴보세요.',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 12),
@@ -109,79 +109,41 @@ class _ResultScreenState extends State<ResultScreen> {
               const SizedBox(height: 24),
 
               SectionTitle(
-                title: '관계에서의 모습',
-                description: '${resultType.name}의 관계 힌트예요.',
+                title: '상세 관계 카드',
+                description: '나의 특징과 관계 속 강점, 조심할 점을 나눠서 살펴봐요.',
               ),
 
-              SoftCard(
-                backgroundColor: AppColors.sky,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: resultType.relationTips.map((tip) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.favorite_rounded,
-                            size: 20,
-                            color: AppColors.navy,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              tip,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
+              ResultDetailSection(
+                icon: Icons.person_rounded,
+                title: '나의 특징',
+                items: resultType.traits,
+                tone: SoftCardTone.surface,
               ),
-
-              const SizedBox(height: 18),
-
-              SectionTitle(
-                title: '조심하면 좋은 부분',
-                description: '관계를 더 편안하게 만들기 위해 피하면 좋은 소통 방식이에요.',
+              const SizedBox(height: 14),
+              ResultDetailSection(
+                icon: Icons.favorite_rounded,
+                title: '관계에서의 강점',
+                items: resultType.strengths,
+                tone: SoftCardTone.sky,
               ),
-
-              SoftCard(
-                backgroundColor: AppColors.lavender,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: resultType.avoidTips.map((tip) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.spa_rounded,
-                            size: 20,
-                            color: AppColors.navy,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              tip,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
+              const SizedBox(height: 14),
+              ResultDetailSection(
+                icon: Icons.spa_rounded,
+                title: '조심할 점',
+                items: resultType.cautions,
+                tone: SoftCardTone.lavender,
               ),
-
+              const SizedBox(height: 14),
+              ResultDetailSection(
+                icon: Icons.groups_rounded,
+                title: '잘 맞는 관계 방식',
+                items: resultType.goodMatches,
+                tone: SoftCardTone.peach,
+              ),
               const SizedBox(height: 18),
 
               const SoftCard(
-                backgroundColor: AppColors.white,
+                tone: SoftCardTone.notice,
                 hasShadow: false,
                 child: Text('이 결과는 전문적인 심리 진단이 아닌, 일상 속 자기이해를 위한 참고용 결과입니다.'),
               ),
@@ -206,8 +168,7 @@ class _ResultScreenState extends State<ResultScreen> {
               RoundedButton(
                 text: '홈으로 돌아가기',
                 icon: Icons.home_rounded,
-                backgroundColor: AppColors.white,
-                foregroundColor: AppColors.textDark,
+                variant: RoundedButtonVariant.secondary,
                 onPressed: () {
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
@@ -230,7 +191,7 @@ class _AxisRatioCard extends StatelessWidget {
     if (percentages.isEmpty) return const SizedBox.shrink();
 
     return SoftCard(
-      backgroundColor: AppColors.white,
+      tone: SoftCardTone.surface,
       hasShadow: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,7 +256,7 @@ class _SavedResultNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SoftCard(
-      backgroundColor: AppColors.white,
+      tone: SoftCardTone.surface,
       hasShadow: false,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
