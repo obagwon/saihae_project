@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
+import '../data/bedtime_question_data.dart';
 import '../data/emotion_data.dart';
 import '../data/recommendation_data.dart';
 import '../models/emotion_record.dart';
@@ -208,6 +209,11 @@ class _RecordScreenState extends State<RecordScreen> {
       intensity: recommendationRecord?.intensity ?? selectedIntensity,
       personalityTypeId: personalityResult?.typeId,
     );
+    final bedtimeQuestion = BedtimeQuestionData.buildQuestion(
+      emotionId: recommendationRecord?.emotionId ?? selectedEmotion.id,
+      intensity: recommendationRecord?.intensity ?? selectedIntensity,
+      personalityTypeId: personalityResult?.typeId,
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -307,7 +313,7 @@ class _RecordScreenState extends State<RecordScreen> {
                     hintText: '비워두어도 괜찮아요. 감정만 저장할 수도 있어요.',
                     hintStyle: Theme.of(context).textTheme.bodySmall,
                     filled: true,
-                    fillColor: AppColors.cream,
+                    fillColor: context.palette.cardMuted,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
                       borderSide: BorderSide.none,
@@ -336,6 +342,8 @@ class _RecordScreenState extends State<RecordScreen> {
           ),
 
           RecommendationCard(recommendation: recommendation),
+          const SizedBox(height: 12),
+          _BedtimeQuestionCard(question: bedtimeQuestion),
 
           const SizedBox(height: 26),
 
@@ -513,6 +521,20 @@ class _EmotionStatsSection extends StatelessWidget {
           _SevenDayIntensityBars(
             dailyStats: stats.recentSevenDayIntensityStats,
           ),
+          const SizedBox(height: 22),
+          Text(
+            '감정 온도 그래프',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '실제 체온이 아니라 감정 강도를 사이해만의 방식으로 표현한 참고 지표예요.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          _EmotionTemperatureGraph(
+            stats: stats,
+          ),
         ],
       ),
     );
@@ -524,6 +546,61 @@ class _EmotionStatsSection extends StatelessWidget {
     }
 
     return '${emotion.emoji} ${emotion.emotionLabel}';
+  }
+}
+
+class _BedtimeQuestionCard extends StatelessWidget {
+  final String question;
+
+  const _BedtimeQuestionCard({required this.question});
+
+  @override
+  Widget build(BuildContext context) {
+    return SoftCard(
+      backgroundColor: AppColors.lavender.withValues(alpha: 0.62),
+      hasShadow: false,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: context.palette.card.withValues(alpha: 0.75),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.nightlight_round,
+              color: AppColors.navy,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '자기 전 나에게 묻기',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  question,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '답을 저장하지 않아도 괜찮아요. 오늘 하루를 조용히 돌아보는 질문이에요.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -616,6 +693,166 @@ class _SevenDayIntensityBars extends StatelessWidget {
   }
 }
 
+class _EmotionTemperatureGraph extends StatelessWidget {
+  final EmotionStats stats;
+
+  const _EmotionTemperatureGraph({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasRecentRecords = stats.recentSevenDayIntensityStats.any(
+      (stat) => stat.recordCount > 0,
+    );
+
+    if (!hasRecentRecords) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.softBeige.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          '최근 7일 감정 온도는 아직 비어 있어요. 기록이 쌓이면 하루별 흐름을 온도로 보여드릴게요.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
+
+    final averageTemperature = emotionTemperatureFromIntensity(
+      stats.recentSevenDayAverageIntensity,
+    );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.blush.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: context.palette.card.withValues(alpha: 0.78),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.device_thermostat_rounded,
+                  color: AppColors.navy,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${averageTemperature.toStringAsFixed(1)}°',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '최근 7일 평균 감정 온도',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _temperatureMessage(averageTemperature),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 18),
+          _SevenDayTemperatureBars(
+            dailyStats: stats.recentSevenDayIntensityStats,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _temperatureMessage(double temperature) {
+    if (temperature > 37.5) {
+      return '감정을 조금 더 선명하게 느끼는 흐름에 가까워요.';
+    }
+
+    if (temperature < 35.5) {
+      return '무덤덤하게 지나가는 흐름에 가까워요.';
+    }
+
+    return '잔잔한 균형에 가까운 흐름이에요.';
+  }
+}
+
+class _SevenDayTemperatureBars extends StatelessWidget {
+  static const double _minTemperature = 30.5;
+  static const double _maxTemperature = 42.5;
+
+  final List<DailyIntensityStat> dailyStats;
+
+  const _SevenDayTemperatureBars({required this.dailyStats});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: dailyStats.map((stat) {
+        final temperature = emotionTemperatureFromIntensity(
+          stat.averageIntensity,
+        );
+        final normalizedHeight = stat.recordCount == 0
+            ? 8.0
+            : 8.0 +
+                ((temperature - _minTemperature) /
+                        (_maxTemperature - _minTemperature) *
+                    74);
+
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  stat.recordCount == 0
+                      ? '-'
+                      : '${temperature.toStringAsFixed(1)}°',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  height: normalizedHeight,
+                  decoration: BoxDecoration(
+                    color: stat.recordCount == 0
+                        ? AppColors.softBeige.withValues(alpha: 0.55)
+                        : AppColors.dustyRose.withValues(alpha: 0.88),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${stat.date.month}/${stat.date.day}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
 class _IntensitySelector extends StatelessWidget {
   final int selectedIntensity;
   final ValueChanged<int> onSelected;
@@ -627,6 +864,8 @@ class _IntensitySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: List.generate(5, (index) {
         final value = index + 1;
@@ -642,10 +881,10 @@ class _IntensitySelector extends StatelessWidget {
                 duration: const Duration(milliseconds: 160),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.textDark : AppColors.cream,
+                  color: isSelected ? context.palette.primary : context.palette.cardMuted,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: isSelected ? AppColors.textDark : AppColors.softBeige,
+                    color: isSelected ? context.palette.primary : context.palette.line,
                   ),
                 ),
                 child: Column(
@@ -653,14 +892,18 @@ class _IntensitySelector extends StatelessWidget {
                     Text(
                       '$value',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: isSelected ? AppColors.white : AppColors.textDark,
+                            color: isSelected
+                                ? (isDark ? AppColors.textDark : AppColors.white)
+                                : context.palette.textPrimary,
                           ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       _intensityLabel(value),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: isSelected ? AppColors.white : AppColors.textLight,
+                            color: isSelected
+                                ? (isDark ? AppColors.textDark : AppColors.white)
+                                : context.palette.textMuted,
                             fontWeight: FontWeight.w700,
                           ),
                     ),

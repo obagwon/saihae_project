@@ -93,7 +93,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               const _OnboardingInfoCard(
                 icon: Icons.info_outline_rounded,
                 title: '가볍지만 신중한 자기이해',
-                description: '상담, 진단, 치료 목적이 아닌 일상 속 참고용이에요. 힘든 감정이 오래 이어지면 주변 사람이나 전문 기관의 도움을 고려해 주세요.',
+                description: '상담이나 진단을 대신하는 목적이 아닌 일상 속 참고용이에요. 힘든 감정이 오래 이어지면 주변 사람이나 전문 기관의 도움을 고려해 주세요.',
                 color: AppColors.lavender,
               ),
               const SizedBox(height: 24),

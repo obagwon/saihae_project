@@ -12,6 +12,8 @@ class SaihaeApp extends StatelessWidget {
       title: '사이해',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       home: const _StartupSplashGate(),
     );
   }

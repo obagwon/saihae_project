@@ -46,10 +46,10 @@ class ResultCard extends StatelessWidget {
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.78),
+                  color: context.palette.card.withValues(alpha: 0.78),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Icon(icon, color: AppColors.navy, size: 28),
+                child: Icon(icon, color: context.palette.primary, size: 28),
               ),
               const Spacer(),
               _Tag(text: 'SAIHAE TYPE CARD'),
@@ -65,7 +65,10 @@ class ResultCard extends StatelessWidget {
           Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
-            children: type.traits.take(3).map((trait) => _Tag(text: trait)).toList(),
+            children: type.traits
+                .take(3)
+                .map((trait) => _Tag(text: trait))
+                .toList(),
           ),
         ],
       ),
@@ -97,7 +100,7 @@ class ResultDetailSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: AppColors.navy, size: 22),
+              Icon(icon, color: context.palette.primary, size: 22),
               const SizedBox(width: AppSpacing.xs),
               Text(title, style: Theme.of(context).textTheme.titleMedium),
             ],
@@ -113,13 +116,18 @@ class ResultDetailSection extends StatelessWidget {
                     width: 6,
                     height: 6,
                     margin: const EdgeInsets.only(top: 8),
-                    decoration: const BoxDecoration(
-                      color: AppColors.navy,
+                    decoration: BoxDecoration(
+                      color: context.palette.primary,
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyMedium)),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -140,13 +148,15 @@ class _Tag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.72),
+        color: context.palette.card.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(AppRadii.chip),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.7)),
+        border: Border.all(color: context.palette.line.withValues(alpha: 0.7)),
       ),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.navy),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: context.palette.primary,
+            ),
       ),
     );
   }

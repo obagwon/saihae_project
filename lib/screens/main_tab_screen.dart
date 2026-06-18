@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
 import 'analysis_screen.dart';
+import 'herbal_tea_screen.dart';
 import 'home_screen.dart';
 import 'record_screen.dart';
 import 'relation_guide_screen.dart';
@@ -60,6 +61,8 @@ class _MainTabScreenState extends State<MainTabScreen> {
         return '관계 가이드';
       case 3:
         return '기록';
+      case 4:
+        return '허브티';
       default:
         return '사이해';
     }
@@ -85,14 +88,15 @@ class _MainTabScreenState extends State<MainTabScreen> {
             initialEmotionId: _initialRecordEmotionId,
             onInitialEmotionConsumed: _clearInitialRecordEmotion,
           ),
+          const HerbalTeaScreen(),
         ],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.palette.card,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: context.palette.shadow,
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -117,6 +121,10 @@ class _MainTabScreenState extends State<MainTabScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.edit_note_rounded),
               label: '기록',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.local_cafe_rounded),
+              label: '허브티',
             ),
           ],
         ),

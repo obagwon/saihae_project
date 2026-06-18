@@ -18,10 +18,14 @@ class EmotionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isSelected
-        ? AppColors.navy
-        : AppColors.white.withValues(alpha: 0.72);
-    final textColor = isSelected ? AppColors.white : AppColors.textBrown;
+        ? palette.primary
+        : palette.card.withValues(alpha: isDark ? 0.78 : 0.72);
+    final textColor = isSelected
+        ? (isDark ? AppColors.textDark : AppColors.white)
+        : palette.textSecondary;
 
     return InkWell(
       onTap: onTap,
@@ -33,7 +37,7 @@ class EmotionChip extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(AppRadii.chip),
           border: Border.all(
-            color: isSelected ? AppColors.navy : AppColors.line,
+            color: isSelected ? palette.primary : palette.line,
           ),
         ),
         child: Text(
