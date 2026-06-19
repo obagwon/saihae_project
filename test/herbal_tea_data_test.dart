@@ -4,34 +4,48 @@ import 'package:saihae_project/data/personality_data.dart';
 import 'package:saihae_project/models/emotion_record.dart';
 
 void main() {
-  test('buildRecommendations prioritizes today complicated emotion teas', () {
-    final teas = HerbalTeaData.buildRecommendations(
-      emotionRecord: _record(emotionId: 'complicated', intensity: 3),
-      personalityType: personalityTypes.first,
-    );
+  test('buildRecommendations returns exactly two teas for each emotion', () {
+    const expectedTeaIdsByEmotion = {
+      'calm': ['rooibos', 'jasmine'],
+      'tired': ['peppermint', 'ginger'],
+      'complicated': ['peppermint', 'lemon_balm'],
+      'excited': ['jasmine', 'chamomile'],
+      'anxious': ['lemon_balm', 'lavender'],
+      'lethargic': ['hibiscus', 'peppermint'],
+    };
 
-    final teaIds = teas.map((tea) => tea.id).toList();
+    for (final entry in expectedTeaIdsByEmotion.entries) {
+      final teas = HerbalTeaData.buildRecommendations(
+        emotionRecord: _record(emotionId: entry.key, intensity: 3),
+        personalityType: personalityTypes.first,
+      );
 
-    expect(teaIds.take(2), ['peppermint', 'lemon_balm']);
+      expect(teas.map((tea) => tea.id), entry.value);
+      expect(teas, hasLength(2));
+    }
   });
 
-  test('buildRecommendations keeps tired emotion ahead of personality reference', () {
-    final teas = HerbalTeaData.buildRecommendations(
-      emotionRecord: _record(emotionId: 'tired', intensity: 3),
-      personalityType: personalityTypes.firstWhere(
-        (type) => type.id == 'idea_pathfinder',
-      ),
+  test('recommendationMessageFor returns requested emotion copy', () {
+    expect(
+      HerbalTeaData.recommendationMessageFor('anxious'),
+      '마음이 흔들릴 때는 레몬밤, 라벤더, 캐모마일처럼 이완감을 주는 차를 천천히 마셔보세요.',
     );
-
-    expect(teas.map((tea) => tea.id), ['rooibos', 'chamomile', 'ginger']);
   });
 
-  test('buildRecommendations returns fallback teas for unknown emotion', () {
+  test('buildRecommendations returns two fallback teas for unknown emotion', () {
     final teas = HerbalTeaData.buildRecommendations(
       emotionRecord: _record(emotionId: 'unknown', intensity: 3),
     );
 
-    expect(teas.map((tea) => tea.id), ['chamomile', 'rooibos', 'peppermint']);
+    expect(teas.map((tea) => tea.id), ['chamomile', 'rooibos']);
+  });
+
+  test('herbal tea detail data includes recommended states and cautions', () {
+    for (final tea in herbalTeaRecommendations) {
+      expect(tea.description, isNotEmpty);
+      expect(tea.recommendedStates, isNotEmpty);
+      expect(tea.caution, isNotEmpty);
+    }
   });
 
   test('herbal tea copy does not include prohibited medical claims', () {
@@ -47,6 +61,7 @@ void main() {
       for (final expression in prohibitedExpressions) {
         expect(tea.description, isNot(contains(expression)));
         expect(tea.moment, isNot(contains(expression)));
+        expect(tea.caution, isNot(contains(expression)));
       }
     }
   });
