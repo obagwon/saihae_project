@@ -199,12 +199,28 @@
 |---|---|
 | `flutter` | Flutter 앱 개발 SDK |
 | `shared_preferences` | 감정 기록, 성향 테스트 결과, 앱 설정의 로컬 저장 |
-| `cupertino_icons` | iOS 스타일 아이콘 사용 가능 |
 | `flutter_native_splash` | 네이티브 스플래시 화면 설정용 패키지 |
 | `flutter_lints` | Dart/Flutter 권장 린트 규칙 적용 |
 | `flutter_launcher_icons` | 앱 런처 아이콘 생성 설정 |
 
-### 5-3. Assets 구성
+### 5-3. 용량 최적화 분석
+
+13강 강의에서 진행한 앱 용량 최적화 실습 결과를 README에 함께 정리했습니다. JSON으로 용량을 분석했을 때, 큰 비중을 차지한 항목은 패키지보다 이미지 assets였으며 특히 `images/personality_cards` 폴더가 가장 큰 비중을 차지했습니다.
+
+| 항목 | 크기/분석 결과 |
+|---|---:|
+| `lib` 전체 | 약 **15.62MB** |
+| `assets` 전체 | 약 **14.76MB** |
+| `images` 전체 | 약 **14.54MB** |
+| `images/personality_cards` | 약 **12.86MB** / JSON 기준 **13,487,968 bytes** |
+| `first_screen.png` | 약 **1.67MB** / JSON 기준 **1,756,073 bytes** |
+| `CupertinoIcons.ttf` | 약 **113KB** / JSON 기준 **115,944 bytes** |
+
+분석 결과, 실제 앱 용량에서 가장 큰 부분은 `CupertinoIcons.ttf`보다 성향 카드 이미지들이었습니다. 다만 현재 코드에서 `CupertinoIcons`를 직접 사용하지 않기 때문에 불필요한 의존성인 `cupertino_icons: ^1.0.8`을 삭제했습니다. 그 결과 기존 애플리케이션 용량은 **31.3MB**였고, 최적화 후에는 **31.2MB**로 약 **0.1MB** 감소했습니다.
+
+> 용량 분석 캡처는 `images/before.png`(최적화 전), `images/after.png`(최적화 후) 파일로 관리합니다. 현재 README 작성 시점의 저장소에서는 두 파일이 확인되지 않아 깨진 이미지가 생기지 않도록 본문에는 삽입하지 않았습니다.
+
+### 5-4. Assets 구성
 
 | 경로 | 역할 |
 |---|---|
@@ -214,7 +230,7 @@
 | `assets/icons/app_icon.png` | 앱 런처 아이콘 원본 |
 | `assets/icons/app_icon_0.png` | 앱 아이콘 관련 추가 이미지 |
 
-`pubspec.yaml`에는 현재 `images/first_screen.png`와 `images/personality_cards/`가 Flutter assets로 등록되어 있습니다.
+`pubspec.yaml`에는 현재 `images/first_screen.png`와 `images/personality_cards/`가 Flutter assets로 등록되어 있습니다. 성향 카드 이미지는 앱의 감성적인 완성도를 높이지만, 용량 분석 결과에서도 가장 큰 비중을 차지하므로 향후 WebP 변환, 해상도 조정, 필요한 이미지만 번들링하는 방식의 추가 최적화가 필요합니다.
 
 ---
 
@@ -375,7 +391,7 @@ flutter build apk --release
 
 이 README는 다음 파일과 폴더를 확인해 작성했습니다.
 
-- `pubspec.yaml`: 프로젝트 의존성, assets, 앱 아이콘 설정 확인
+- `pubspec.yaml`: 프로젝트 의존성, assets, 앱 아이콘 설정 및 `cupertino_icons` 제거 확인
 - `lib/main.dart`, `lib/app/app.dart`, `lib/app/theme.dart`: 앱 실행 구조, 초기 화면, 테마/다크모드 확인
 - `lib/screens/`: 홈, 나 분석, 관계, 기록, 허브티, 테스트, 결과 화면 흐름 확인
 - `lib/data/`: 감정, 성향, 테스트 질문, 관계 비교, 허브티 추천, 자기돌봄 데이터 확인
