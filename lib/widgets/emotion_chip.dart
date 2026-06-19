@@ -24,7 +24,7 @@ class EmotionChip extends StatelessWidget {
         ? palette.primary
         : palette.card.withValues(alpha: isDark ? 0.78 : 0.72);
     final textColor = isSelected
-        ? (isDark ? AppColors.textDark : AppColors.white)
+        ? (Theme.of(context).colorScheme.onPrimary)
         : palette.textSecondary;
 
     return InkWell(

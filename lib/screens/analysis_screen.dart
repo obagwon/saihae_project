@@ -190,9 +190,9 @@ class _SavedAnalysisContent extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
+              Icon(
                 Icons.check_circle_rounded,
-                color: AppColors.navy,
+                color: context.palette.primary,
                 size: 22,
               ),
               const SizedBox(width: 10),
@@ -235,14 +235,14 @@ class _EmptyAnalysisContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SoftCard(
-          backgroundColor: AppColors.white,
+          backgroundColor: context.palette.card,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
+              Icon(
                 Icons.psychology_alt_rounded,
                 size: 42,
-                color: AppColors.navy,
+                color: context.palette.primary,
               ),
               const SizedBox(height: 16),
               Text(
@@ -281,83 +281,88 @@ class _ScoreSummary extends StatelessWidget {
 
   const _ScoreSummary({required this.scores});
 
-  static const List<_AxisScoreMeta> _axisMetas = [
-    _AxisScoreMeta(
-      key: 'external',
-      label: '외부 지향',
-      icon: Icons.groups_rounded,
-      color: AppColors.dustyRose,
+  static const List<_AxisPairSpec> _axisPairs = [
+    _AxisPairSpec(
+      leftKey: 'external',
+      leftLabel: '외부 지향',
+      leftIcon: Icons.groups_rounded,
+      rightKey: 'internal',
+      rightLabel: '내부 지향',
+      rightIcon: Icons.self_improvement_rounded,
     ),
-    _AxisScoreMeta(
-      key: 'internal',
-      label: '내부 지향',
-      icon: Icons.self_improvement_rounded,
-      color: AppColors.navy,
+    _AxisPairSpec(
+      leftKey: 'realistic',
+      leftLabel: '현실 감각',
+      leftIcon: Icons.task_alt_rounded,
+      rightKey: 'possibility',
+      rightLabel: '가능성 탐색',
+      rightIcon: Icons.auto_awesome_rounded,
     ),
-    _AxisScoreMeta(
-      key: 'realistic',
-      label: '현실 감각',
-      icon: Icons.task_alt_rounded,
-      color: AppColors.textBrown,
-    ),
-    _AxisScoreMeta(
-      key: 'possibility',
-      label: '가능성 탐색',
-      icon: Icons.auto_awesome_rounded,
-      color: AppColors.dustyRose,
-    ),
-    _AxisScoreMeta(
-      key: 'logical',
-      label: '논리 판단',
-      icon: Icons.psychology_rounded,
-      color: AppColors.navy,
-    ),
-    _AxisScoreMeta(
-      key: 'relational',
-      label: '관계 공감',
-      icon: Icons.favorite_rounded,
-      color: AppColors.dustyRose,
+    _AxisPairSpec(
+      leftKey: 'logical',
+      leftLabel: '논리 판단',
+      leftIcon: Icons.psychology_rounded,
+      rightKey: 'relational',
+      rightLabel: '관계 공감',
+      rightIcon: Icons.favorite_rounded,
     ),
   ];
 
-  List<_AxisScoreData> _buildScoreData() {
-    final axisData = <_AxisScoreData>[];
+  List<_AxisPairData> _buildPairData() {
+    return _axisPairs
+        .map(_pairDataFor)
+        .whereType<_AxisPairData>()
+        .toList();
+  }
 
-    for (final meta in _axisMetas) {
-      final score = scores[meta.key];
-      if (score == null) continue;
+  _AxisPairData? _pairDataFor(_AxisPairSpec spec) {
+    final leftValue = _normalizedValue(scores[spec.leftKey]);
+    final rightValue = _normalizedValue(scores[spec.rightKey]);
 
-      axisData.add(
-        _AxisScoreData(meta: meta, value: score.clamp(0, 100).toInt()),
+    if (leftValue == null && rightValue == null) {
+      return null;
+    }
+
+    if (leftValue == null) {
+      return _AxisPairData(
+        spec: spec,
+        leftPercent: 100 - rightValue!,
+        rightPercent: rightValue,
       );
     }
 
-    for (final entry in scores.entries) {
-      final isKnownAxis = _axisMetas.any((meta) => meta.key == entry.key);
-      if (isKnownAxis) continue;
-
-      axisData.add(
-        _AxisScoreData(
-          meta: _AxisScoreMeta(
-            key: entry.key,
-            label: entry.key,
-            icon: Icons.tune_rounded,
-            color: AppColors.textLight,
-          ),
-          value: entry.value.clamp(0, 100).toInt(),
-        ),
+    if (rightValue == null) {
+      return _AxisPairData(
+        spec: spec,
+        leftPercent: leftValue,
+        rightPercent: 100 - leftValue,
       );
     }
 
-    return axisData;
+    final total = leftValue + rightValue;
+    if (total <= 0) {
+      return null;
+    }
+
+    final normalizedLeft = ((leftValue / total) * 100).round();
+    return _AxisPairData(
+      spec: spec,
+      leftPercent: normalizedLeft,
+      rightPercent: 100 - normalizedLeft,
+    );
+  }
+
+  int? _normalizedValue(int? value) {
+    if (value == null) return null;
+    return value.clamp(0, 100).toInt();
   }
 
   @override
   Widget build(BuildContext context) {
-    final axisData = _buildScoreData();
+    final pairData = _buildPairData();
 
     return SoftCard(
-      backgroundColor: AppColors.white,
+      backgroundColor: context.palette.card,
       hasShadow: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,12 +373,12 @@ class _ScoreSummary extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: AppColors.sky.withValues(alpha: 0.72),
+                  color: context.palette.sky.withValues(alpha: 0.72),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.bar_chart_rounded,
-                  color: AppColors.navy,
+                  color: context.palette.primary,
                   size: 22,
                 ),
               ),
@@ -397,17 +402,17 @@ class _ScoreSummary extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 18),
-          if (axisData.isEmpty)
+          if (pairData.isEmpty)
             Text(
               '아직 표시할 성향 축 비율이 없어요. '
               '테스트를 마치면 흐름을 부드럽게 보여드릴게요.',
               style: Theme.of(context).textTheme.bodyMedium,
             )
           else
-            ...axisData.map(
+            ...pairData.map(
               (data) => Padding(
                 padding: const EdgeInsets.only(bottom: 14),
-                child: _AxisScoreBar(data: data),
+                child: _AxisPairBar(data: data),
               ),
             ),
         ],
@@ -416,68 +421,68 @@ class _ScoreSummary extends StatelessWidget {
   }
 }
 
-class _AxisScoreData {
-  final _AxisScoreMeta meta;
-  final int value;
+class _AxisPairData {
+  final _AxisPairSpec spec;
+  final int leftPercent;
+  final int rightPercent;
 
-  const _AxisScoreData({
-    required this.meta,
-    required this.value,
+  const _AxisPairData({
+    required this.spec,
+    required this.leftPercent,
+    required this.rightPercent,
   });
 }
 
-class _AxisScoreMeta {
-  final String key;
-  final String label;
-  final IconData icon;
-  final Color color;
+class _AxisPairSpec {
+  final String leftKey;
+  final String leftLabel;
+  final IconData leftIcon;
+  final String rightKey;
+  final String rightLabel;
+  final IconData rightIcon;
 
-  const _AxisScoreMeta({
-    required this.key,
-    required this.label,
-    required this.icon,
-    required this.color,
+  const _AxisPairSpec({
+    required this.leftKey,
+    required this.leftLabel,
+    required this.leftIcon,
+    required this.rightKey,
+    required this.rightLabel,
+    required this.rightIcon,
   });
 }
 
-class _AxisScoreBar extends StatelessWidget {
-  final _AxisScoreData data;
+class _AxisPairBar extends StatelessWidget {
+  final _AxisPairData data;
 
-  const _AxisScoreBar({required this.data});
+  const _AxisPairBar({required this.data});
 
   @override
   Widget build(BuildContext context) {
-    final progress = data.value / 100;
+    final leftColor = context.palette.primary;
+    final rightColor = context.palette.accent;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: data.meta.color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(data.meta.icon, color: data.meta.color, size: 18),
-            ),
-            const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                data.meta.label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textDark,
-                    ),
+              child: _AxisSideLabel(
+                icon: data.spec.leftIcon,
+                label: data.spec.leftLabel,
+                percent: data.leftPercent,
+                color: leftColor,
               ),
             ),
-            Text(
-              '${data.value}%',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.navy,
-                  ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: _AxisSideLabel(
+                icon: data.spec.rightIcon,
+                label: data.spec.rightLabel,
+                percent: data.rightPercent,
+                color: rightColor,
+                alignEnd: true,
+              ),
             ),
           ],
         ),
@@ -489,21 +494,33 @@ class _AxisScoreBar extends StatelessWidget {
               return Stack(
                 children: [
                   Container(
-                    height: 10,
+                    height: 12,
                     decoration: BoxDecoration(
-                      color: AppColors.line.withValues(alpha: 0.75),
+                      color: context.palette.line.withValues(alpha: 0.58),
                       borderRadius: BorderRadius.circular(AppRadii.chip),
                     ),
                   ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 260),
-                    curve: Curves.easeOutCubic,
-                    width: constraints.maxWidth * progress,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: data.meta.color,
-                      borderRadius: BorderRadius.circular(AppRadii.chip),
-                    ),
+                  Row(
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 260),
+                        curve: Curves.easeOutCubic,
+                        width: constraints.maxWidth * data.leftPercent / 100,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: leftColor.withValues(alpha: 0.86),
+                        ),
+                      ),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 260),
+                        curve: Curves.easeOutCubic,
+                        width: constraints.maxWidth * data.rightPercent / 100,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: rightColor.withValues(alpha: 0.86),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               );
@@ -511,6 +528,64 @@ class _AxisScoreBar extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AxisSideLabel extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int percent;
+  final Color color;
+  final bool alignEnd;
+
+  const _AxisSideLabel({
+    required this.icon,
+    required this.label,
+    required this.percent,
+    required this.color,
+    this.alignEnd = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final labelText = Flexible(
+      child: Text(
+        label,
+        overflow: TextOverflow.ellipsis,
+        textAlign: alignEnd ? TextAlign.right : TextAlign.left,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: context.palette.textPrimary,
+              fontWeight: FontWeight.w800,
+            ),
+      ),
+    );
+    final percentText = Text(
+      '$percent%',
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w800,
+          ),
+    );
+    final children = [
+      Icon(icon, color: color, size: 17),
+      const SizedBox(width: 6),
+      labelText,
+      const SizedBox(width: 5),
+      percentText,
+    ];
+    final endAlignedChildren = [
+      percentText,
+      const SizedBox(width: 5),
+      labelText,
+      const SizedBox(width: 6),
+      Icon(icon, color: color, size: 17),
+    ];
+
+    return Row(
+      mainAxisAlignment:
+          alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: alignEnd ? endAlignedChildren : children,
     );
   }
 }

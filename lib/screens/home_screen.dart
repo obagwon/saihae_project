@@ -323,7 +323,7 @@ class _RecentResultCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _IconBadge(icon: Icons.auto_awesome_rounded, backgroundColor: AppColors.white),
+          _IconBadge(icon: Icons.auto_awesome_rounded, backgroundColor: context.palette.card),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -383,7 +383,7 @@ class _ShortcutCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _IconBadge(icon: icon, backgroundColor: AppColors.white),
+          _IconBadge(icon: icon, backgroundColor: context.palette.card),
           const SizedBox(height: AppSpacing.sm),
           Text(title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.xxs),
@@ -473,33 +473,44 @@ class _TodayEmotionCompleteCard extends StatelessWidget {
     required this.onRecheck,
   });
 
-  String get _flowMessage {
-    switch (record.emotionId) {
-      case 'calm':
-        return '오늘은 편안한 흐름에 가까워요.';
-      case 'excited':
-        return '오늘은 가벼운 기대감이 함께하고 있어요.';
-      case 'tired':
-        return '오늘은 잠깐 쉬어가는 흐름도 잘 어울려요.';
-      case 'complicated':
-        return '오늘은 생각을 천천히 풀어볼 시간이 필요할 수 있어요.';
-      case 'anxious':
-        return '오늘은 마음의 속도를 조금 낮춰도 괜찮아요.';
-      case 'lethargic':
-        return '오늘은 아주 작은 움직임부터 시작해도 충분해요.';
-      default:
-        return '오늘의 마음을 조용히 살펴본 하루예요.';
-    }
-  }
-
-  String get _recommendation {
+  EmotionGuide? get _matchedGuide {
     for (final guide in emotionGuides) {
       if (guide.id == record.emotionId) {
-        return guide.tip;
+        return guide;
       }
     }
 
-    return '지금 떠오르는 생각을 한 문장으로 남겨보세요.';
+    return null;
+  }
+
+  String get _todayMoodMessage => '오늘은 ${record.emotionLabel}에 가까운 상태예요.';
+
+  String get _oneLineTip {
+    final tip = _matchedGuide?.tip.trim();
+    if (tip != null && tip.isNotEmpty) {
+      return tip;
+    }
+
+    return '지금 떠오르는 마음을 한 문장으로 가볍게 남겨보세요.';
+  }
+
+  String get _supportingMessage {
+    switch (record.emotionId) {
+      case 'calm':
+        return '차분한 흐름을 이어가기 좋은 작은 루틴과 잘 맞아요.';
+      case 'excited':
+        return '기대되는 마음을 오늘 해볼 수 있는 작은 행동으로 옮겨보세요.';
+      case 'tired':
+        return '큰 계획보다 잠깐 쉬어가는 선택이 잘 맞을 수 있어요.';
+      case 'complicated':
+        return '생각을 바로 정리하려 하기보다 천천히 펼쳐보는 시간이 어울려요.';
+      case 'anxious':
+        return '마음의 속도를 조금 낮추고 지금 할 수 있는 것부터 살펴보세요.';
+      case 'lethargic':
+        return '가장 쉬운 행동 하나만 골라도 오늘의 시작이 될 수 있어요.';
+      default:
+        return '오늘의 마음을 조용히 알아차린 것만으로도 충분할 수 있어요.';
+    }
   }
 
   @override
@@ -512,9 +523,18 @@ class _TodayEmotionCompleteCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                record.emoji,
-                style: Theme.of(context).textTheme.headlineLarge,
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: context.palette.card.withValues(alpha: 0.72),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  record.emoji,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -523,11 +543,13 @@ class _TodayEmotionCompleteCard extends StatelessWidget {
                   children: [
                     Text(
                       '오늘 체크 완료',
-                      style: Theme.of(context).textTheme.labelLarge,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: context.palette.primary,
+                          ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      record.emotionLabel,
+                      _todayMoodMessage,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],
@@ -536,18 +558,56 @@ class _TodayEmotionCompleteCard extends StatelessWidget {
               _PillLabel(text: '기록됨'),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(_flowMessage, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: AppSpacing.xs),
-          Text(_recommendation, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            _supportingMessage,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: context.palette.card.withValues(alpha: 0.68),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: context.palette.line.withValues(alpha: 0.58),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline_rounded,
+                  color: context.palette.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: Text(
+                    _oneLineTip,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           Align(
             alignment: Alignment.centerLeft,
-            child: RoundedButton(
-              text: '다시 체크하기',
-              icon: Icons.refresh_rounded,
-              variant: RoundedButtonVariant.secondary,
+            child: TextButton.icon(
               onPressed: onRecheck,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('다시 체크하기'),
+              style: TextButton.styleFrom(
+                foregroundColor: context.palette.textSecondary,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                textStyle: Theme.of(context).textTheme.labelMedium,
+              ),
             ),
           ),
         ],
@@ -571,7 +631,7 @@ class _DailyTipCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _IconBadge(icon: Icons.tips_and_updates_rounded, backgroundColor: AppColors.white),
+          _IconBadge(icon: Icons.tips_and_updates_rounded, backgroundColor: context.palette.card),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -613,9 +673,7 @@ class _IconBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedBackground = backgroundColor == AppColors.white
-        ? context.palette.card
-        : backgroundColor;
+    final resolvedBackground = backgroundColor;
 
     return Container(
       width: 46,

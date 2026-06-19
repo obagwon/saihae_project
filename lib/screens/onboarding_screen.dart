@@ -191,7 +191,7 @@ class _BubbleNode extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(size * 0.36),
       ),
-      child: Icon(icon, color: AppColors.navy, size: size * 0.36),
+      child: Icon(icon, color: context.palette.primary, size: size * 0.36),
     );
   }
 }
@@ -237,10 +237,10 @@ class _OnboardingInfoCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.76),
+              color: context.palette.card.withValues(alpha: 0.76),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: AppColors.navy),
+            child: Icon(icon, color: context.palette.primary),
           ),
           const SizedBox(width: 14),
           Expanded(

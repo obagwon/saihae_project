@@ -232,7 +232,7 @@ class _RecordScreenState extends State<RecordScreen> {
           const SizedBox(height: 24),
 
           SoftCard(
-            backgroundColor: AppColors.white,
+            backgroundColor: context.palette.card,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -428,10 +428,10 @@ class _EmotionStatsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const SoftCard(
-        backgroundColor: AppColors.white,
+      return SoftCard(
+        backgroundColor: context.palette.card,
         hasShadow: false,
-        child: Center(
+        child: const Center(
           child: Padding(
             padding: EdgeInsets.all(12),
             child: CircularProgressIndicator(),
@@ -452,7 +452,7 @@ class _EmotionStatsSection extends StatelessWidget {
     }
 
     return SoftCard(
-      backgroundColor: AppColors.white,
+      backgroundColor: context.palette.card,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -514,22 +514,8 @@ class _EmotionStatsSection extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            '최근 7일 강도 흐름',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 12),
-          _SevenDayIntensityBars(
-            dailyStats: stats.recentSevenDayIntensityStats,
-          ),
-          const SizedBox(height: 22),
-          Text(
             '감정 온도 그래프',
             style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '실제 체온이 아니라 감정 강도를 사이해만의 방식으로 표현한 참고 지표예요.',
-            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 12),
           _EmotionTemperatureGraph(
@@ -569,9 +555,9 @@ class _BedtimeQuestionCard extends StatelessWidget {
               color: context.palette.card.withValues(alpha: 0.75),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.nightlight_round,
-              color: AppColors.navy,
+              color: context.palette.primary,
             ),
           ),
           const SizedBox(width: 12),
@@ -643,56 +629,6 @@ class _StatValueCard extends StatelessWidget {
   }
 }
 
-class _SevenDayIntensityBars extends StatelessWidget {
-  final List<DailyIntensityStat> dailyStats;
-
-  const _SevenDayIntensityBars({required this.dailyStats});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: dailyStats.map((stat) {
-        final normalizedHeight = stat.averageIntensity <= 0
-            ? 8.0
-            : 8.0 + (stat.averageIntensity / 5 * 74);
-
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  stat.recordCount == 0
-                      ? '-'
-                      : stat.averageIntensity.toStringAsFixed(1),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  height: normalizedHeight,
-                  decoration: BoxDecoration(
-                    color: stat.recordCount == 0
-                        ? AppColors.softBeige.withValues(alpha: 0.55)
-                        : AppColors.textDark.withValues(alpha: 0.82),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${stat.date.month}/${stat.date.day}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
 class _EmotionTemperatureGraph extends StatelessWidget {
   final EmotionStats stats;
 
@@ -700,16 +636,18 @@ class _EmotionTemperatureGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasRecentRecords = stats.recentSevenDayIntensityStats.any(
-      (stat) => stat.recordCount > 0,
-    );
+    final recordedStats = stats.recentSevenDayIntensityStats
+        .where((stat) => stat.recordCount > 0)
+        .toList();
+    final recordDayCount = recordedStats.length;
+    final hasRecentRecords = recordDayCount > 0;
 
     if (!hasRecentRecords) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.softBeige.withValues(alpha: 0.55),
+          color: context.palette.cardMuted.withValues(alpha: 0.58),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -722,13 +660,15 @@ class _EmotionTemperatureGraph extends StatelessWidget {
     final averageTemperature = emotionTemperatureFromIntensity(
       stats.recentSevenDayAverageIntensity,
     );
+    final hasEnoughPointsForLine = recordDayCount >= 2;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.blush.withValues(alpha: 0.5),
+        color: context.palette.blush.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.palette.line.withValues(alpha: 0.58)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -743,9 +683,9 @@ class _EmotionTemperatureGraph extends StatelessWidget {
                   color: context.palette.card.withValues(alpha: 0.78),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.device_thermostat_rounded,
-                  color: AppColors.navy,
+                  color: context.palette.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -754,7 +694,7 @@ class _EmotionTemperatureGraph extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${averageTemperature.toStringAsFixed(1)}°',
+                      '평균 ${averageTemperature.toStringAsFixed(1)}°',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 2),
@@ -772,9 +712,21 @@ class _EmotionTemperatureGraph extends StatelessWidget {
             _temperatureMessage(averageTemperature),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
+          if (!hasEnoughPointsForLine) ...[
+            const SizedBox(height: 8),
+            Text(
+              '아직 점이 하나라 선보다 오늘의 위치를 참고해보세요. 기록이 더 쌓이면 흐름이 이어져 보여요.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
           const SizedBox(height: 18),
-          _SevenDayTemperatureBars(
+          _SevenDayTemperatureLineChart(
             dailyStats: stats.recentSevenDayIntensityStats,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '실제 체온이 아니라 감정 강도를 사이해만의 방식으로 표현한 참고 지표예요.',
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),
@@ -782,74 +734,191 @@ class _EmotionTemperatureGraph extends StatelessWidget {
   }
 
   String _temperatureMessage(double temperature) {
-    if (temperature > 37.5) {
-      return '감정을 조금 더 선명하게 느끼는 흐름에 가까워요.';
+    if (temperature >= 37.4) {
+      return '감정을 조금 크게 느끼는 흐름일 수 있어요.';
     }
 
-    if (temperature < 35.5) {
-      return '무덤덤하게 지나가는 흐름에 가까워요.';
+    if (temperature <= 35.6) {
+      return '감정을 크게 느끼기보다 무덤덤하게 지나가는 흐름일 수 있어요.';
     }
 
-    return '잔잔한 균형에 가까운 흐름이에요.';
+    return '비교적 안정적인 흐름에 가까워요.';
   }
 }
 
-class _SevenDayTemperatureBars extends StatelessWidget {
+class _SevenDayTemperatureLineChart extends StatelessWidget {
   static const double _minTemperature = 30.5;
   static const double _maxTemperature = 42.5;
 
   final List<DailyIntensityStat> dailyStats;
 
-  const _SevenDayTemperatureBars({required this.dailyStats});
+  const _SevenDayTemperatureLineChart({required this.dailyStats});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: dailyStats.map((stat) {
-        final temperature = emotionTemperatureFromIntensity(
-          stat.averageIntensity,
-        );
-        final normalizedHeight = stat.recordCount == 0
-            ? 8.0
-            : 8.0 +
-                ((temperature - _minTemperature) /
-                        (_maxTemperature - _minTemperature) *
-                    74);
-
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  stat.recordCount == 0
-                      ? '-'
-                      : '${temperature.toStringAsFixed(1)}°',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  height: normalizedHeight,
-                  decoration: BoxDecoration(
-                    color: stat.recordCount == 0
-                        ? AppColors.softBeige.withValues(alpha: 0.55)
-                        : AppColors.dustyRose.withValues(alpha: 0.88),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${stat.date.month}/${stat.date.day}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+    return Column(
+      children: [
+        SizedBox(
+          height: 150,
+          width: double.infinity,
+          child: CustomPaint(
+            painter: _TemperatureLineChartPainter(
+              dailyStats: dailyStats,
+              minTemperature: _minTemperature,
+              maxTemperature: _maxTemperature,
+              lineColor: context.palette.primary,
+              pointColor: context.palette.accent,
+              placeholderColor: context.palette.line,
+              guideColor: context.palette.line.withValues(alpha: 0.48),
+              textColor: context.palette.textMuted,
             ),
           ),
-        );
-      }).toList(),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: dailyStats
+              .map(
+                (stat) => Expanded(
+                  child: Text(
+                    '${stat.date.month}/${stat.date.day}',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+      ],
     );
+  }
+}
+
+class _TemperatureLineChartPainter extends CustomPainter {
+  final List<DailyIntensityStat> dailyStats;
+  final double minTemperature;
+  final double maxTemperature;
+  final Color lineColor;
+  final Color pointColor;
+  final Color placeholderColor;
+  final Color guideColor;
+  final Color textColor;
+
+  const _TemperatureLineChartPainter({
+    required this.dailyStats,
+    required this.minTemperature,
+    required this.maxTemperature,
+    required this.lineColor,
+    required this.pointColor,
+    required this.placeholderColor,
+    required this.guideColor,
+    required this.textColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const leftPadding = 8.0;
+    const rightPadding = 8.0;
+    const topPadding = 18.0;
+    const bottomPadding = 22.0;
+    final chartWidth = size.width - leftPadding - rightPadding;
+    final chartHeight = size.height - topPadding - bottomPadding;
+    final step = dailyStats.length <= 1 ? 0 : chartWidth / (dailyStats.length - 1);
+    final points = <Offset>[];
+
+    final guidePaint = Paint()
+      ..color = guideColor
+      ..strokeWidth = 1;
+    final linePaint = Paint()
+      ..color = lineColor
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+    final pointPaint = Paint()..color = pointColor;
+    final placeholderPaint = Paint()
+      ..color = placeholderColor.withValues(alpha: 0.46)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4;
+
+    for (final guideTemperature in [30.5, 36.5, 42.5]) {
+      final y = _yForTemperature(guideTemperature, topPadding, chartHeight);
+      canvas.drawLine(
+        Offset(leftPadding, y),
+        Offset(size.width - rightPadding, y),
+        guidePaint,
+      );
+      _drawText(
+        canvas,
+        '${guideTemperature.toStringAsFixed(1)}°',
+        Offset(leftPadding, y - 16),
+      );
+    }
+
+    for (var index = 0; index < dailyStats.length; index++) {
+      final stat = dailyStats[index];
+      final x = leftPadding + step * index;
+
+      if (stat.recordCount == 0) {
+        final placeholderY = _yForTemperature(36.5, topPadding, chartHeight);
+        canvas.drawCircle(Offset(x, placeholderY), 4, placeholderPaint);
+        continue;
+      }
+
+      final temperature = emotionTemperatureFromIntensity(stat.averageIntensity)
+          .clamp(minTemperature, maxTemperature)
+          .toDouble();
+      final point = Offset(
+        x,
+        _yForTemperature(temperature, topPadding, chartHeight),
+      );
+      points.add(point);
+    }
+
+    if (points.length >= 2) {
+      final path = Path()..moveTo(points.first.dx, points.first.dy);
+      for (final point in points.skip(1)) {
+        path.lineTo(point.dx, point.dy);
+      }
+      canvas.drawPath(path, linePaint);
+    }
+
+    for (final point in points) {
+      canvas.drawCircle(point, 5.5, pointPaint);
+      canvas.drawCircle(point, 2.5, Paint()..color = lineColor);
+    }
+  }
+
+  double _yForTemperature(
+    double temperature,
+    double topPadding,
+    double chartHeight,
+  ) {
+    final ratio = (temperature - minTemperature) / (maxTemperature - minTemperature);
+    return topPadding + (1 - ratio.clamp(0.0, 1.0)) * chartHeight;
+  }
+
+  void _drawText(Canvas canvas, String text, Offset offset) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(canvas, offset);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TemperatureLineChartPainter oldDelegate) {
+    return oldDelegate.dailyStats != dailyStats ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.pointColor != pointColor ||
+        oldDelegate.placeholderColor != placeholderColor ||
+        oldDelegate.guideColor != guideColor ||
+        oldDelegate.textColor != textColor;
   }
 }
 
@@ -893,7 +962,7 @@ class _IntensitySelector extends StatelessWidget {
                       '$value',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: isSelected
-                                ? (isDark ? AppColors.textDark : AppColors.white)
+                                ? (Theme.of(context).colorScheme.onPrimary)
                                 : context.palette.textPrimary,
                           ),
                     ),
@@ -902,7 +971,7 @@ class _IntensitySelector extends StatelessWidget {
                       _intensityLabel(value),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: isSelected
-                                ? (isDark ? AppColors.textDark : AppColors.white)
+                                ? (Theme.of(context).colorScheme.onPrimary)
                                 : context.palette.textMuted,
                             fontWeight: FontWeight.w700,
                           ),
@@ -951,7 +1020,7 @@ class _RecordItem extends StatelessWidget {
     final memoText = record.memo.trim().isEmpty ? _emptyMemoText : record.memo;
 
     return SoftCard(
-      backgroundColor: AppColors.white,
+      backgroundColor: context.palette.card,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1002,7 +1071,7 @@ class _IntensityBadge extends StatelessWidget {
       child: Text(
         '강도 $intensity/5',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textDark,
+              color: context.palette.textPrimary,
               fontWeight: FontWeight.w700,
             ),
       ),

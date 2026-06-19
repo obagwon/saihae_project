@@ -220,6 +220,7 @@ class AppTheme {
 
   static ThemeData _buildTheme(AppPalette palette, Brightness brightness) {
     final isDark = brightness == Brightness.dark;
+    final onPrimary = isDark ? AppColors.textDark : AppColors.white;
 
     return ThemeData(
       useMaterial3: true,
@@ -233,6 +234,7 @@ class AppTheme {
         primary: palette.primary,
         secondary: palette.accent,
         surface: palette.card,
+        onPrimary: onPrimary,
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: palette.background,
@@ -312,7 +314,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: palette.primary,
-          foregroundColor: isDark ? AppColors.textDark : AppColors.white,
+          foregroundColor: onPrimary,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           shape: RoundedRectangleBorder(

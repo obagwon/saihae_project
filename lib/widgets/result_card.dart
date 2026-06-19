@@ -39,24 +39,26 @@ class ResultCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: _Tag(text: 'SAIHAE TYPE CARD'),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _PersonalityCardImage(typeId: type.id, fallbackIcon: icon),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  color: context.palette.card.withValues(alpha: 0.78),
-                  borderRadius: BorderRadius.circular(20),
+              Expanded(
+                child: Text(
+                  type.name,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
-                child: Icon(icon, color: context.palette.primary, size: 28),
               ),
-              const Spacer(),
-              _Tag(text: 'SAIHAE TYPE CARD'),
+              const SizedBox(width: AppSpacing.sm),
+              _MaterialIconBadge(icon: icon),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(type.name, style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: AppSpacing.xs),
           Text(type.subtitle, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.md),
@@ -72,6 +74,94 @@ class ResultCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PersonalityCardImage extends StatelessWidget {
+  final String typeId;
+  final IconData fallbackIcon;
+
+  const _PersonalityCardImage({
+    required this.typeId,
+    required this.fallbackIcon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final imageHeight =
+            (constraints.maxWidth * 0.62).clamp(168.0, 230.0).toDouble();
+
+        return Container(
+          width: double.infinity,
+          height: imageHeight,
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: context.palette.card.withValues(alpha: 0.62),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: context.palette.line.withValues(alpha: 0.62),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Image.asset(
+              'images/personality_cards/$typeId.png',
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return _PersonalityImageFallback(icon: fallbackIcon);
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PersonalityImageFallback extends StatelessWidget {
+  final IconData icon;
+
+  const _PersonalityImageFallback({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.palette.cardMuted.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Center(
+        child: Icon(
+          icon,
+          color: context.palette.primary,
+          size: 54,
+        ),
+      ),
+    );
+  }
+}
+
+class _MaterialIconBadge extends StatelessWidget {
+  final IconData icon;
+
+  const _MaterialIconBadge({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        color: context.palette.card.withValues(alpha: 0.78),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: context.palette.line.withValues(alpha: 0.58),
+        ),
+      ),
+      child: Icon(icon, color: context.palette.primary, size: 21),
     );
   }
 }

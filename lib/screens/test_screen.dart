@@ -110,7 +110,7 @@ class _TestScreenState extends State<TestScreen> {
             LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.softBeige,
-              color: AppColors.navy,
+              color: context.palette.primary,
               minHeight: 8,
               borderRadius: BorderRadius.circular(AppRadii.chip),
             ),
@@ -126,10 +126,10 @@ class _TestScreenState extends State<TestScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppColors.white.withValues(alpha: 0.78),
+                      color: context.palette.card.withValues(alpha: 0.78),
                       borderRadius: BorderRadius.circular(18),
                     ),
-                    child: const Icon(Icons.forum_rounded, color: AppColors.navy),
+                    child: Icon(Icons.forum_rounded, color: context.palette.primary),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(

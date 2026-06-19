@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../app/theme.dart';
+import '../data/herbal_tea_data.dart';
 import '../data/personality_data.dart';
 import '../models/emotion_record.dart';
 import '../models/personality_test_result.dart';
 import '../models/personality_type.dart';
 import '../services/local_storage_service.dart';
+import '../widgets/rounded_button.dart';
 import '../widgets/section_title.dart';
 import '../widgets/soft_card.dart';
 
 class HerbalTeaScreen extends StatefulWidget {
-  const HerbalTeaScreen({super.key});
+  final VoidCallback? onOpenRecord;
+
+  const HerbalTeaScreen({super.key, this.onOpenRecord});
 
   @override
   State<HerbalTeaScreen> createState() => _HerbalTeaScreenState();
@@ -73,11 +77,14 @@ class _HerbalTeaScreenState extends State<HerbalTeaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final recommendations = buildTeaRecommendations(
-      emotionRecord: todayEmotionRecord,
-      personalityType: savedType,
-    );
-    final hasPersonalContext = savedType != null || todayEmotionRecord != null;
+    final todayRecord = todayEmotionRecord;
+    final recommendations = todayRecord == null
+        ? const <HerbalTeaRecommendation>[]
+        : HerbalTeaData.buildRecommendations(
+            emotionRecord: todayRecord,
+            personalityType: savedType,
+          );
+    final hasTodayRecord = todayRecord != null;
 
     return RefreshIndicator(
       onRefresh: loadHerbalTeaData,
@@ -98,31 +105,31 @@ class _HerbalTeaScreenState extends State<HerbalTeaScreen> {
           if (isLoading)
             const _HerbalTeaLoadingCard()
           else ...[
-            if (!hasPersonalContext) ...[
-              const _HerbalTeaEmptyGuideCard(),
-              const SizedBox(height: 18),
-            ],
-            _HerbalTeaContextCard(
-              type: savedType,
-              record: todayEmotionRecord,
-            ),
-            const SizedBox(height: 22),
-            SectionTitle(
-              title: '추천 허브티',
-              description: hasPersonalContext
-                  ? '오늘의 흐름에 어울리는 후보를 골라봤어요.'
-                  : '기본 추천부터 편안하게 둘러보세요.',
-            ),
-            ...recommendations.map(
-              (tea) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _HerbalTeaRecommendationCard(tea: tea),
+            if (!hasTodayRecord) ...[
+              _HerbalTeaEmptyGuideCard(onOpenRecord: widget.onOpenRecord),
+              const SizedBox(height: 16),
+              const _HerbalTeaNotice(),
+            ] else ...[
+              _HerbalTeaContextCard(
+                type: savedType,
+                record: todayRecord,
               ),
-            ),
-            const SizedBox(height: 12),
-            const _HerbalTeaCandidateList(),
-            const SizedBox(height: 16),
-            const _HerbalTeaNotice(),
+              const SizedBox(height: 22),
+              const SectionTitle(
+                title: '추천 허브티',
+                description: '오늘의 마음 기록을 먼저 보고, 성향은 가볍게 참고했어요.',
+              ),
+              ...recommendations.map(
+                (tea) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _HerbalTeaRecommendationCard(tea: tea),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const _HerbalTeaCandidateList(),
+              const SizedBox(height: 16),
+              const _HerbalTeaNotice(),
+            ],
           ],
         ],
       ),
@@ -130,169 +137,15 @@ class _HerbalTeaScreenState extends State<HerbalTeaScreen> {
   }
 }
 
-List<HerbalTeaRecommendation> buildTeaRecommendations({
-  required EmotionRecord? emotionRecord,
-  required PersonalityType? personalityType,
-}) {
-  final teaIds = <String>[];
-
-  void addTea(String id) {
-    if (!teaIds.contains(id)) {
-      teaIds.add(id);
-    }
-  }
-
-  final intensity = emotionRecord?.intensity;
-  switch (emotionRecord?.emotionId) {
-    case 'tired':
-      addTea('ginger');
-      addTea('rooibos');
-      break;
-    case 'complicated':
-      addTea('peppermint');
-      addTea('lemon_balm');
-      break;
-    case 'excited':
-      addTea('jasmine');
-      addTea('hibiscus');
-      break;
-    case 'anxious':
-      addTea('lavender');
-      addTea('chamomile');
-      break;
-    case 'lethargic':
-      addTea('hibiscus');
-      addTea('peppermint');
-      break;
-    case 'calm':
-      addTea('rooibos');
-      addTea('chamomile');
-      break;
-  }
-
-  if (intensity != null && intensity >= 4) {
-    addTea('lemon_balm');
-  } else if (intensity != null && intensity <= 2) {
-    addTea('hibiscus');
-  }
-
-  switch (personalityType?.id) {
-    case 'field_captain':
-    case 'idea_pathfinder':
-      addTea('peppermint');
-      break;
-    case 'warm_coordinator':
-    case 'dream_weaver':
-      addTea('jasmine');
-      break;
-    case 'quiet_builder':
-    case 'gentle_keeper':
-      addTea('rooibos');
-      break;
-    case 'inner_strategist':
-    case 'soft_lantern':
-      addTea('lemon_balm');
-      break;
-  }
-
-  addTea('chamomile');
-  addTea('rooibos');
-  addTea('peppermint');
-
-  return teaIds.take(3).map((id) => _teaById(id)).toList();
-}
-
-HerbalTeaRecommendation _teaById(String id) {
-  return herbalTeaRecommendations.firstWhere(
-    (tea) => tea.id == id,
-    orElse: () => herbalTeaRecommendations.first,
-  );
-}
-
-class HerbalTeaRecommendation {
-  final String id;
-  final String name;
-  final String emoji;
-  final String description;
-  final String moment;
-
-  const HerbalTeaRecommendation({
-    required this.id,
-    required this.name,
-    required this.emoji,
-    required this.description,
-    required this.moment,
-  });
-}
-
-const List<HerbalTeaRecommendation> herbalTeaRecommendations = [
-  HerbalTeaRecommendation(
-    id: 'chamomile',
-    name: '캐모마일',
-    emoji: '🌼',
-    description: '하루를 천천히 내려놓는 휴식 분위기에 잘 어울려요.',
-    moment: '잠들기 전 조용한 음악과 함께',
-  ),
-  HerbalTeaRecommendation(
-    id: 'peppermint',
-    name: '페퍼민트',
-    emoji: '🌿',
-    description: '가볍게 기분 전환하며 머릿속을 환기하고 싶을 때 어울려요.',
-    moment: '생각을 정리하기 전 한 잔',
-  ),
-  HerbalTeaRecommendation(
-    id: 'rooibos',
-    name: '루이보스',
-    emoji: '🫖',
-    description: '따뜻하게 쉬어가는 데 어울리는 부드러운 분위기의 차예요.',
-    moment: '늦은 오후나 저녁의 짧은 쉼',
-  ),
-  HerbalTeaRecommendation(
-    id: 'lavender',
-    name: '라벤더',
-    emoji: '💜',
-    description: '조용하고 포근한 분위기를 만들고 싶을 때 잘 어울려요.',
-    moment: '불빛을 낮추고 쉬어갈 때',
-  ),
-  HerbalTeaRecommendation(
-    id: 'hibiscus',
-    name: '히비스커스',
-    emoji: '🌺',
-    description: '상큼한 색과 향으로 가볍게 기분 전환하기 좋아요.',
-    moment: '조금 산뜻한 리듬이 필요할 때',
-  ),
-  HerbalTeaRecommendation(
-    id: 'lemon_balm',
-    name: '레몬밤',
-    emoji: '🍋',
-    description: '은은한 향으로 하루의 속도를 천천히 낮추는 데 어울려요.',
-    moment: '생각이 많았던 날의 마무리',
-  ),
-  HerbalTeaRecommendation(
-    id: 'jasmine',
-    name: '자스민',
-    emoji: '🤍',
-    description: '부드러운 향과 함께 따뜻한 장면을 떠올리기 좋아요.',
-    moment: '좋았던 순간을 기록하기 전',
-  ),
-  HerbalTeaRecommendation(
-    id: 'ginger',
-    name: '생강차',
-    emoji: '🫚',
-    description: '따뜻한 컵을 손에 쥐고 천천히 쉬어가기에 어울려요.',
-    moment: '몸과 마음을 차분히 데우고 싶을 때',
-  ),
-];
-
 class _HerbalTeaLoadingCard extends StatelessWidget {
   const _HerbalTeaLoadingCard();
 
   @override
   Widget build(BuildContext context) {
-    return const SoftCard(
-      backgroundColor: AppColors.white,
+    return SoftCard(
+      backgroundColor: context.palette.card,
       hasShadow: false,
-      child: Center(
+      child: const Center(
         child: Padding(
           padding: EdgeInsets.all(12),
           child: CircularProgressIndicator(),
@@ -303,16 +156,37 @@ class _HerbalTeaLoadingCard extends StatelessWidget {
 }
 
 class _HerbalTeaEmptyGuideCard extends StatelessWidget {
-  const _HerbalTeaEmptyGuideCard();
+  final VoidCallback? onOpenRecord;
+
+  const _HerbalTeaEmptyGuideCard({required this.onOpenRecord});
 
   @override
   Widget build(BuildContext context) {
     return SoftCard(
       backgroundColor: AppColors.softYellow.withValues(alpha: 0.72),
       hasShadow: false,
-      child: Text(
-        '성향 테스트나 오늘의 마음 체크를 남기면 더 잘 어울리는 허브티를 골라볼 수 있어요. 지금은 기본 추천을 보여드릴게요.',
-        style: Theme.of(context).textTheme.bodyMedium,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '오늘의 마음 체크가 먼저 필요해요',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '허브티 추천은 오늘 남긴 마음 기록을 1순위로 참고해요. 기록 탭에서 지금 마음을 가볍게 남긴 뒤 다시 확인해보세요.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          if (onOpenRecord != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            RoundedButton(
+              text: '기록 탭에서 마음 체크하기',
+              icon: Icons.edit_note_rounded,
+              variant: RoundedButtonVariant.tonal,
+              onPressed: onOpenRecord,
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -329,18 +203,18 @@ class _HerbalTeaContextCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typeText = type == null ? '성향 카드 없음' : type!.name;
-    final emotionText = record == null
-        ? '오늘 마음 기록 없음'
-        : '${record!.emoji} ${record!.emotionLabel} · 강도 ${record!.intensity}/5';
+    final typeText =
+        type == null ? '성향 참고: 성향 카드 없음' : '성향 참고: ${type!.name}';
+    final emotionText =
+        '오늘의 마음: ${record!.emoji} ${record!.emotionLabel} · 강도 ${record!.intensity}/5';
 
     return SoftCard(
-      backgroundColor: AppColors.white,
+      backgroundColor: context.palette.card,
       hasShadow: false,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.local_cafe_rounded, color: AppColors.navy),
+          Icon(Icons.local_cafe_rounded, color: context.palette.primary),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -362,7 +236,7 @@ class _HerbalTeaRecommendationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SoftCard(
-      backgroundColor: AppColors.white,
+      backgroundColor: context.palette.card,
       hasShadow: false,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,7 +249,10 @@ class _HerbalTeaRecommendationCard extends StatelessWidget {
               children: [
                 Text(tea.name, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: AppSpacing.xxs),
-                Text(tea.description, style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  tea.description,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   tea.moment,

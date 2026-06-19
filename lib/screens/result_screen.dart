@@ -198,9 +198,9 @@ class _AxisRatioCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.tune_rounded,
-                color: AppColors.navy,
+                color: context.palette.primary,
                 size: 22,
               ),
               const SizedBox(width: 8),
@@ -236,7 +236,7 @@ class _AxisRatioRow extends StatelessWidget {
           const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: LinearProgressIndicator(value: left / 100, minHeight: 8, backgroundColor: AppColors.softBeige, color: AppColors.navy),
+            child: LinearProgressIndicator(value: left / 100, minHeight: 8, backgroundColor: context.palette.cardMuted, color: context.palette.primary),
           ),
         ],
       ),

@@ -66,7 +66,7 @@ class RoundedButton extends StatelessWidget {
       case RoundedButtonVariant.primary:
         return (
           palette.primary,
-          isDark ? AppColors.textDark : AppColors.white,
+          Theme.of(context).colorScheme.onPrimary,
           palette.primary,
         );
       case RoundedButtonVariant.secondary:
