@@ -218,7 +218,15 @@
 
 분석 결과, 실제 앱 용량에서 가장 큰 부분은 `CupertinoIcons.ttf`보다 성향 카드 이미지들이었습니다. 다만 현재 코드에서 `CupertinoIcons`를 직접 사용하지 않기 때문에 불필요한 의존성인 `cupertino_icons: ^1.0.8`을 삭제했습니다. 그 결과 기존 애플리케이션 용량은 **31.3MB**였고, 최적화 후에는 **31.2MB**로 약 **0.1MB** 감소했습니다.
 
-> 용량 분석 캡처는 `images/before.png`(최적화 전), `images/after.png`(최적화 후) 파일로 관리합니다. 현재 README 작성 시점의 저장소에서는 두 파일이 확인되지 않아 깨진 이미지가 생기지 않도록 본문에는 삽입하지 않았습니다.
+용량 최적화 전후 분석 캡처는 `images/before.png`와 `images/after.png`로 `images/` 폴더에 추가했습니다. 아래 이미지를 통해 `cupertino_icons` 제거 전후의 빌드 분석 결과와 최종 APK 용량 변화를 확인할 수 있습니다.
+
+| 최적화 전 | 최적화 후 |
+|---|---|
+| <img src="images/before.png" width="360" alt="용량 최적화 전 분석 결과"> | <img src="images/after.png" width="360" alt="용량 최적화 후 분석 결과"> |
+
+- **최적화 전**: `images/personality_cards`와 `first_screen.png` 등 이미지 assets가 앱 용량의 큰 비중을 차지하는 것을 확인했습니다.
+- **최적화 후**: 사용하지 않는 `cupertino_icons` 의존성을 제거해 APK 용량을 **31.3MB → 31.2MB**로 줄였습니다.
+- **추가 개선 여지**: 현재 가장 큰 용량 항목은 이미지 assets이므로, 추후 성향 카드 이미지 WebP 변환과 해상도 조정을 진행하면 더 큰 폭의 용량 절감이 가능합니다.
 
 ### 5-4. Assets 구성
 
