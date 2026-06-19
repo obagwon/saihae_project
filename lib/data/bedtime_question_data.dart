@@ -5,28 +5,82 @@ class BedtimeQuestionData {
     String? personalityTypeId,
     DateTime? now,
   }) {
-    final normalizedIntensity = intensity?.clamp(1, 5).toInt();
+    final normalizedIntensity = _normalizeIntensity(intensity);
+    final normalizedEmotionId = _normalizeKey(emotionId);
+    final normalizedPersonalityTypeId = _normalizeKey(personalityTypeId);
 
-    if (normalizedIntensity != null && normalizedIntensity >= 4) {
-      return _highIntensityQuestions[emotionId] ??
-          '오늘 내가 너무 오래 붙잡고 있었던 감정은 무엇인가요?';
+    final intensityQuestion = _questionForIntensity(
+      normalizedIntensity,
+      normalizedEmotionId,
+    );
+    if (intensityQuestion != null) {
+      return intensityQuestion;
     }
 
-    if (normalizedIntensity != null && normalizedIntensity <= 2) {
-      return _lowIntensityQuestions[emotionId] ??
-          '오늘 무덤덤하게 지나갔지만 은근히 남아 있는 장면은 무엇인가요?';
-    }
-
-    final personalityQuestion = _personalityQuestions[personalityTypeId];
+    final personalityQuestion =
+        _personalityQuestions[normalizedPersonalityTypeId];
     if (personalityQuestion != null) {
       return personalityQuestion;
     }
 
-    final emotionQuestion = _emotionQuestions[emotionId];
+    final emotionQuestion = _emotionQuestions[normalizedEmotionId];
     if (emotionQuestion != null) {
       return emotionQuestion;
     }
 
+    return _defaultQuestionFor(now);
+  }
+
+  static int? _normalizeIntensity(int? intensity) {
+    return intensity?.clamp(1, 5).toInt();
+  }
+
+  static String? _normalizeKey(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+
+    return trimmed;
+  }
+
+  static String? _questionForIntensity(int? intensity, String? emotionId) {
+    if (intensity == null) {
+      return null;
+    }
+
+    if (intensity >= 4) {
+      return _questionFromMap(
+        _highIntensityQuestions,
+        emotionId,
+        fallback: '오늘 내가 너무 오래 붙잡고 있었던 감정은 무엇인가요?',
+      );
+    }
+
+    if (intensity <= 2) {
+      return _questionFromMap(
+        _lowIntensityQuestions,
+        emotionId,
+        fallback: '오늘 무덤덤하게 지나갔지만 은근히 남아 있는 장면은 무엇인가요?',
+      );
+    }
+
+    return null;
+  }
+
+  static String _questionFromMap(
+    Map<String, String> questions,
+    String? key, {
+    required String fallback,
+  }) {
+    if (key == null) {
+      return fallback;
+    }
+
+    return questions[key] ?? fallback;
+  }
+
+  static String _defaultQuestionFor(DateTime? now) {
     final date = now ?? DateTime.now();
     return _defaultQuestions[date.day % _defaultQuestions.length];
   }
@@ -73,5 +127,6 @@ class BedtimeQuestionData {
     '오늘 내가 너무 오래 붙잡고 있었던 감정은 무엇인가요?',
     '오늘 생각보다 잘 버틴 순간은 언제였나요?',
     '오늘 다시 떠올리고 싶은 따뜻한 장면은 무엇인가요?',
+    '내일의 나에게 한 문장만 남긴다면 뭐라고 말하고 싶나요?',
   ];
 }

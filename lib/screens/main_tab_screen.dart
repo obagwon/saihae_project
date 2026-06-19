@@ -43,6 +43,12 @@ class _MainTabScreenState extends State<MainTabScreen> {
     });
   }
 
+  void _openRecordTab() {
+    setState(() {
+      _selectedIndex = 3;
+    });
+  }
+
   void _clearInitialRecordEmotion() {
     if (_initialRecordEmotionId == null) return;
 
@@ -88,7 +94,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
             initialEmotionId: _initialRecordEmotionId,
             onInitialEmotionConsumed: _clearInitialRecordEmotion,
           ),
-          const HerbalTeaScreen(),
+          HerbalTeaScreen(onOpenRecord: _openRecordTab),
         ],
       ),
       bottomNavigationBar: Container(

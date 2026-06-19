@@ -138,7 +138,7 @@ class _RelationGuideScreenState extends State<RelationGuideScreen> {
       AppColors.softPink,
       AppColors.softPeach,
       AppColors.softBeige,
-      AppColors.white,
+      AppColors.warmIvory,
     ];
 
     return colors[index % colors.length];
@@ -217,7 +217,7 @@ class _ComparePreviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.compare_arrows_rounded, color: AppColors.navy),
+              Icon(Icons.compare_arrows_rounded, color: context.palette.primary),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 '관계 비교 미리보기',
@@ -233,13 +233,14 @@ class _ComparePreviewCard extends StatelessWidget {
                   label: '나',
                   title: myType?.name ?? '아직 비어 있어요',
                   description: myType?.subtitle ?? '테스트 후 내 카드를 자동으로 불러와요.',
+                  type: myType,
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                 child: Icon(
                   Icons.favorite_rounded,
-                  color: AppColors.navy,
+                  color: context.palette.primary,
                   size: 20,
                 ),
               ),
@@ -248,6 +249,7 @@ class _ComparePreviewCard extends StatelessWidget {
                   label: '상대 성향',
                   title: partnerType.name,
                   description: '${partnerType.subtitle}\n탭해서 다른 성향을 골라볼 수 있어요.',
+                  type: partnerType,
                   icon: _relationIconForType(partnerType),
                   onTap: onSelectPartnerType,
                 ),
@@ -276,6 +278,7 @@ class _CompareMiniCard extends StatelessWidget {
   final String label;
   final String title;
   final String description;
+  final PersonalityType? type;
   final IconData? icon;
   final VoidCallback? onTap;
 
@@ -283,6 +286,7 @@ class _CompareMiniCard extends StatelessWidget {
     required this.label,
     required this.title,
     required this.description,
+    this.type,
     this.icon,
     this.onTap,
   });
@@ -299,15 +303,31 @@ class _CompareMiniCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadii.compactCard),
           border: onTap == null
               ? null
-              : Border.all(color: AppColors.navy.withValues(alpha: 0.12)),
+              : Border.all(color: context.palette.primary.withValues(alpha: 0.12)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (type != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 86,
+                  child: _PersonalityTypeImage(
+                    type: type!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
             Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, color: AppColors.navy, size: 18),
+                  Icon(icon, color: context.palette.primary, size: 18),
                   const SizedBox(width: AppSpacing.xxs),
                 ],
                 Expanded(
@@ -316,13 +336,13 @@ class _CompareMiniCard extends StatelessWidget {
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
-                        ?.copyWith(color: AppColors.navy),
+                        ?.copyWith(color: context.palette.primary),
                   ),
                 ),
                 if (onTap != null)
-                  const Icon(
+                  Icon(
                     Icons.expand_more_rounded,
-                    color: AppColors.textLight,
+                    color: context.palette.textMuted,
                     size: 18,
                   ),
               ],
@@ -348,8 +368,8 @@ class _SavedRelationLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SoftCard(
-      backgroundColor: AppColors.white,
+    return SoftCard(
+      backgroundColor: context.palette.card,
       hasShadow: false,
       child: Center(
         child: Padding(
@@ -383,9 +403,9 @@ class _MyRelationGuideCard extends StatelessWidget {
                   color: context.palette.card.withValues(alpha: 0.72),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.favorite_rounded,
-                  color: AppColors.textDark,
+                  color: context.palette.textPrimary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -491,7 +511,7 @@ class _PartnerTypePickerSheet extends StatelessWidget {
                   width: 44,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: AppColors.line,
+                    color: context.palette.line,
                     borderRadius: BorderRadius.circular(AppRadii.chip),
                   ),
                 ),
@@ -564,23 +584,23 @@ class _PartnerTypePickerTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadii.compactCard),
             border: Border.all(
               color: isSelected
-                  ? AppColors.navy.withValues(alpha: 0.24)
-                  : AppColors.line,
+                  ? context.palette.primary.withValues(alpha: 0.24)
+                  : context.palette.line,
             ),
           ),
           child: Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.softPink.withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  _relationIconForType(type),
-                  color: AppColors.navy,
-                  size: 23,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: SizedBox(
+                  width: 54,
+                  height: 54,
+                  child: _PersonalityTypeImage(
+                    type: type,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -604,15 +624,15 @@ class _PartnerTypePickerTile extends StatelessWidget {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 160),
                 child: isSelected
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_circle_rounded,
-                        key: ValueKey('selected'),
-                        color: AppColors.navy,
+                        key: const ValueKey('selected'),
+                        color: context.palette.primary,
                       )
-                    : const Icon(
+                    : Icon(
                         Icons.radio_button_unchecked_rounded,
-                        key: ValueKey('unselected'),
-                        color: AppColors.textLight,
+                        key: const ValueKey('unselected'),
+                        color: context.palette.textMuted,
                       ),
               ),
             ],
@@ -661,7 +681,7 @@ class _RelationshipCompareSheet extends StatelessWidget {
                   width: 44,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: AppColors.line,
+                    color: context.palette.line,
                     borderRadius: BorderRadius.circular(AppRadii.chip),
                   ),
                 ),
@@ -738,37 +758,46 @@ class _CompareHeaderIcons extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _CompareTypeIcon(type: myType),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        _CompareTypeImage(type: myType),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Icon(
             Icons.favorite_rounded,
-            color: AppColors.dustyRose,
+            color: context.palette.primary,
             size: 28,
           ),
         ),
-        _CompareTypeIcon(type: partnerType),
+        _CompareTypeImage(type: partnerType),
       ],
     );
   }
 }
 
-class _CompareTypeIcon extends StatelessWidget {
+class _CompareTypeImage extends StatelessWidget {
   final PersonalityType type;
 
-  const _CompareTypeIcon({required this.type});
+  const _CompareTypeImage({required this.type});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 62,
-      height: 62,
+      width: 74,
+      height: 74,
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: context.palette.card.withValues(alpha: 0.86),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.line),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: context.palette.line),
       ),
-      child: Icon(_relationIconForType(type), color: AppColors.navy, size: 30),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: _PersonalityTypeImage(
+          type: type,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+      ),
     );
   }
 }
@@ -799,7 +828,7 @@ class _ComparisonSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.navy, size: 22),
+          Icon(icon, color: context.palette.primary, size: 22),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
@@ -961,7 +990,7 @@ class _RelationTypeDetailSheet extends StatelessWidget {
                   width: 44,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: AppColors.line,
+                    color: context.palette.line,
                     borderRadius: BorderRadius.circular(AppRadii.chip),
                   ),
                 ),
@@ -1077,9 +1106,9 @@ class _PersonalityTypeImageFallback extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: AppColors.white.withValues(alpha: 0.62),
+      color: context.palette.card.withValues(alpha: 0.62),
       child: Center(
-        child: Icon(_relationIconForType(type), color: AppColors.navy, size: 38),
+        child: Icon(_relationIconForType(type), color: context.palette.primary, size: 38),
       ),
     );
   }
@@ -1119,8 +1148,12 @@ _RelationshipComparison _buildRelationshipComparison(
   PersonalityType partnerType,
 ) {
   final directMatch = _relationshipMatchFor(myType);
-  final bestReason = _matchReason(directMatch?.bestMatches, partnerType.id);
-  final growthReason = _matchReason(directMatch?.growthMatches, partnerType.id);
+  final partnerMatch = _relationshipMatchFor(partnerType);
+  final bestReason = _matchReason(directMatch?.bestMatches, partnerType.id) ??
+      _matchReason(partnerMatch?.bestMatches, myType.id);
+  final growthReason =
+      _matchReason(directMatch?.growthMatches, partnerType.id) ??
+          _matchReason(partnerMatch?.growthMatches, myType.id);
   final sameType = myType.id == partnerType.id;
 
   if (sameType) {
@@ -1228,9 +1261,12 @@ String _firstOrFallback(List<String> items, String fallback) {
 }
 
 String _cleanComparisonText(String text) {
-  final carefulText = String.fromCharCodes([47928, 51228]);
-
-  return text.replaceAll(carefulText, '상황');
+  return text
+      .replaceAll('잘 안 맞는다', '조율할 지점이 있다')
+      .replaceAll('상극이다', '속도가 다를 수 있다')
+      .replaceAll('문제가 있다', '살펴볼 지점이 있다')
+      .replaceAll('문제', '상황')
+      .replaceAll('위험하다', '천천히 확인해볼 필요가 있다');
 }
 
 PersonalityType? _findTypeById(String typeId) {
@@ -1271,7 +1307,7 @@ class _RelationshipMatchSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 21, color: AppColors.textDark),
+              Icon(icon, size: 21, color: context.palette.textPrimary),
               const SizedBox(width: AppSpacing.xs),
               Text(title, style: Theme.of(context).textTheme.titleMedium),
             ],
@@ -1320,7 +1356,7 @@ class _RelationshipMatchTile extends StatelessWidget {
               matchedType == null
                   ? Icons.favorite_border_rounded
                   : _relationIconForType(matchedType),
-              color: AppColors.navy,
+              color: context.palette.primary,
               size: 21,
             ),
           ),
@@ -1400,7 +1436,7 @@ class _MiniSection extends StatelessWidget {
               Icon(
                 icon,
                 size: 21,
-                color: AppColors.textDark,
+                color: context.palette.textPrimary,
               ),
               const SizedBox(width: 8),
               Text(
