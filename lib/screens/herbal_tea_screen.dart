@@ -85,6 +85,9 @@ class _HerbalTeaScreenState extends State<HerbalTeaScreen> {
             personalityType: savedType,
           );
     final hasTodayRecord = todayRecord != null;
+    final recommendationMessage = todayRecord == null
+        ? null
+        : HerbalTeaData.recommendationMessageFor(todayRecord.emotionId);
 
     return RefreshIndicator(
       onRefresh: loadHerbalTeaData,
@@ -115,9 +118,9 @@ class _HerbalTeaScreenState extends State<HerbalTeaScreen> {
                 record: todayRecord,
               ),
               const SizedBox(height: 22),
-              const SectionTitle(
+              SectionTitle(
                 title: '추천 허브티',
-                description: '오늘의 마음 기록을 먼저 보고, 성향은 가볍게 참고했어요.',
+                description: recommendationMessage!,
               ),
               ...recommendations.map(
                 (tea) => Padding(
@@ -280,13 +283,16 @@ class _HerbalTeaCandidateList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('허브티 후보', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            '다른 허브티도 알아보기',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: herbalTeaRecommendations.map((tea) {
-              return _TeaChip(label: '${tea.emoji} ${tea.name}');
+              return _TeaChip(tea: tea);
             }).toList(),
           ),
         ],
@@ -296,19 +302,120 @@ class _HerbalTeaCandidateList extends StatelessWidget {
 }
 
 class _TeaChip extends StatelessWidget {
-  final String label;
+  final HerbalTeaRecommendation tea;
 
-  const _TeaChip({required this.label});
+  const _TeaChip({required this.tea});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showTeaDetail(context, tea),
+        borderRadius: BorderRadius.circular(AppRadii.chip),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+          decoration: BoxDecoration(
+            color: context.palette.card.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(AppRadii.chip),
+            border: Border.all(
+              color: context.palette.line.withValues(alpha: 0.55),
+            ),
+          ),
+          child: Text(
+            '${tea.emoji} ${tea.name}',
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showTeaDetail(BuildContext context, HerbalTeaRecommendation tea) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: context.palette.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) => _TeaDetailSheet(tea: tea),
+    );
+  }
+}
+
+class _TeaDetailSheet extends StatelessWidget {
+  final HerbalTeaRecommendation tea;
+
+  const _TeaDetailSheet({required this.tea});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 4, 22, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tea.emoji,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    tea.name,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                ),
+                IconButton(
+                  tooltip: '닫기',
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _TeaDetailRow(title: '설명', text: tea.description),
+            const SizedBox(height: AppSpacing.sm),
+            _TeaDetailRow(title: '추천 상태', text: tea.recommendedStates),
+            const SizedBox(height: AppSpacing.sm),
+            _TeaDetailRow(title: '주의', text: tea.caution),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TeaDetailRow extends StatelessWidget {
+  final String title;
+  final String text;
+
+  const _TeaDetailRow({required this.title, required this.text});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: context.palette.card.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(AppRadii.chip),
+        color: context.palette.cardMuted.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(AppRadii.compactCard),
+        border: Border.all(color: context.palette.line.withValues(alpha: 0.5)),
       ),
-      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(text, style: Theme.of(context).textTheme.bodyMedium),
+        ],
+      ),
     );
   }
 }

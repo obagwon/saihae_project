@@ -603,25 +603,43 @@ class _StatValueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? Color.alphaBlend(
+            color.withValues(alpha: 0.18),
+            context.palette.cardMuted,
+          )
+        : color;
+    final titleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: isDark ? context.palette.textSecondary : null,
+          fontWeight: isDark ? FontWeight.w700 : null,
+        );
+    final valueStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: isDark ? context.palette.textPrimary : null,
+        );
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(18),
+        border: isDark
+            ? Border.all(color: context.palette.line.withValues(alpha: 0.7))
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: titleStyle,
           ),
           const SizedBox(height: 6),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: valueStyle,
           ),
         ],
       ),
